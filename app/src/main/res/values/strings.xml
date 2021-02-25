@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Simple Quiz</string>
+    <string name="question_text">Текст вопроса: придумать</string>
+    <string name="true_button">Правда</string>
+    <string name="false_button">Не правда</string>
+    <string name="correct_toast">Вы ответили верно</string>
+    <string name="incorrect_toast">Вы ответили не верно</string>
+    <string name="already_answered_toast">Вы уже отвечали</string>
+    <string name="next_button">Следующий</string>
+    <string name="start_button">Начать игру</string>
+    <string name="title_app">Вопросы от географа</string>
+    <string name="return_button_text">Предыдущий</string>
+    <string name="next_question">Next question</string>
+    <string name="last_item">last item</string>
+
+</resources>
