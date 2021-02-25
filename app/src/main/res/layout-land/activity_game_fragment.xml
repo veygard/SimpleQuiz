@@ -4,12 +4,30 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/start_over"
+        android:textStyle="bold"
+        android:layout_marginEnd="8dp"
+        android:text="@string/start_over"
+        android:onClick="starOverButtonClick"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/question_text_view"
         android:gravity="center"
         android:padding="24dp"
+        android:layout_gravity="center_horizontal"
+        tools:text="Временный текст"
+        tools:background="@color/cardview_shadow_end_color"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/question_answer_view"
+        android:gravity="center"
+        android:padding="12dp"
         android:layout_gravity="center_horizontal"
         tools:text="Временный текст"
         tools:background="@color/cardview_shadow_end_color"/>
@@ -23,7 +41,7 @@
         android:layout_marginTop="8dp">
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:id="@+id/true_button"
             android:textStyle="bold"
@@ -31,36 +49,31 @@
             android:text="@string/true_button" />
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:text="@string/false_button"
             android:id="@+id/false_button" />
     </LinearLayout>
 
-    <LinearLayout
+    <ImageButton
+        android:id="@+id/next_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart ="8dp"
-        android:layout_gravity="bottom|right"
-        android:layout_marginTop="8dp">
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/return_button"
-            android:drawablePadding="10dp"
-            android:src="@mipmap/ic_before_question"
-            android:contentDescription="@string/last_item" />
+        android:contentDescription="@string/next_question"
+        android:layout_gravity="center"
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/next_button"
-            android:drawablePadding="10dp"
-            android:src="@mipmap/ic_next_question"
+        android:drawablePadding="10dp"
 
-            android:contentDescription="@string/next_question" />
+        android:src="@mipmap/ic_next_question" />
 
-    </LinearLayout>
+    <!--    <ImageButton-->
+<!--        android:id="@+id/return_button"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:contentDescription="@string/last_item"-->
+<!--        android:drawablePadding="10dp"-->
+<!--        android:src="@mipmap/ic_before_question" />-->
+
 
 </LinearLayout>

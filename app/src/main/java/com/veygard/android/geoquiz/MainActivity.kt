@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 private const val TAG = "MainActivity"
 
@@ -43,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startButtonClick(view: View) {
-        startActivity(Intent(this, AfterStart::class.java))
+        startActivity(Intent(this, GameActivity::class.java))
     }
 }
 
