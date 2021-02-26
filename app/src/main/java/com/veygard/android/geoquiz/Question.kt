@@ -4,41 +4,42 @@ import androidx.annotation.StringRes
 
 class Question(val text: String, val answer: Boolean, var questionShowed: Boolean) {
 
-    fun getQuestionList() : List<Question>{
-        return     listOf(
-                Question("Ворона и сорока — одно и то же. ",false, true),
-                Question("Рубанок — инструмент столяра. ",true, false),
-                Question("Кашпо — вид шарфа. ",false, false),
-                Question("Бобслей — санный вид спорта. ",true, false),
-                Question("23:00 — то же, что 8 часов вечера. ",false, false),
-                Question("Мэри Поппинс родом из Франции. ",false, false),
-                Question("Английский алфавит длиннее русского. ",false, false),
-                Question("В слове «день» 4 звука. ",false, false),
-                Question("Судно с двумя корпусами — катамаран. ",true, false),
-                Question("Октябрь — самый длинный осенний месяц. ",true, false),
-                Question("Столица Египта — Каир. ",true, false),
-                Question("Фортепиано относится к духовым инструментам. ",false, false),
-                Question("Война с Наполеоном была в 1812 году. ",true, false),
-                Question("Изумруд — камень синего цвета. ",false, false),
-                Question("Суши — японское блюдо. ",true, false),
-                Question("Рождество в России отмечают 14 января. ",false, false),
-                Question("Цветик-семицветик исполнял желания. ",true, false),
-                Question("Антрекот — это пирожное. ",false, false),
-                Question("Емеля поймал Золотую рыбку. ",false, false),
-                Question("Если сегодня четверг, то позавчера был вторник. ",true, false),
-                Question("Голкипер — это защитник в хоккее. ",true, false),
-                Question("Семнадцать делится на семь. ",false, false),
-                Question("Помадой красят ресницы. ",false, false),
-                Question("Майор — это звание между капитаном и подполковником. ",true, false),
-                Question("Голландия — то же самое, что и Нидерланды. ",true, false),
-                Question("Дагестан находится в России. ",true, false),
-                Question("Чечётка — это название танца. ",true, false),
-                Question("В слове «пень» один слог. ",true, false),
-                Question("Коалы обитают в Норвегии. ",false, false),
-                Question("На футбольном поле двое ворот. ",true, false),
-                Question("Динозавров изучает палеонтология. ",true, false),
-                Question("Хомяки являются хищниками. ",false, false),
-                Question("Кондитер изготавливает обувь. ",false, false),
+    companion object {
+        fun getQuestionList(): List<Question> {
+            return listOf(
+                Question("Ворона и сорока — одно и то же. ", false, true),
+                Question("Рубанок — инструмент столяра. ", true, false),
+                Question("Кашпо — вид шарфа. ", false, false),
+                Question("Бобслей — санный вид спорта. ", true, false),
+                Question("23:00 — то же, что 8 часов вечера. ", false, false),
+                Question("Мэри Поппинс родом из Франции. ", false, false),
+                Question("Английский алфавит длиннее русского. ", false, false),
+//                Question("В слове «день» 4 звука. ", false, false),
+//                Question("Судно с двумя корпусами — катамаран. ", true, false),
+//                Question("Октябрь — самый длинный осенний месяц. ", true, false),
+//                Question("Столица Египта — Каир. ", true, false),
+//                Question("Фортепиано относится к духовым инструментам. ", false, false),
+//                Question("Война с Наполеоном была в 1812 году. ", true, false),
+//                Question("Изумруд — камень синего цвета. ", false, false),
+//                Question("Суши — японское блюдо. ", true, false),
+//                Question("Рождество в России отмечают 14 января. ", false, false),
+//                Question("Цветик-семицветик исполнял желания. ", true, false),
+//                Question("Антрекот — это пирожное. ", false, false),
+//                Question("Емеля поймал Золотую рыбку. ", false, false),
+//                Question("Если сегодня четверг, то позавчера был вторник. ", true, false),
+//                Question("Голкипер — это защитник в хоккее. ", true, false),
+//                Question("Семнадцать делится на семь. ", false, false),
+//                Question("Помадой красят ресницы. ", false, false),
+//                Question("Майор — это звание между капитаном и подполковником. ", true, false),
+//                Question("Голландия — то же самое, что и Нидерланды. ", true, false),
+//                Question("Дагестан находится в России. ", true, false),
+//                Question("Чечётка — это название танца. ", true, false),
+//                Question("В слове «пень» один слог. ", true, false),
+//                Question("Коалы обитают в Норвегии. ", false, false),
+//                Question("На футбольном поле двое ворот. ", true, false),
+//                Question("Динозавров изучает палеонтология. ", true, false),
+//                Question("Хомяки являются хищниками. ", false, false),
+//                Question("Кондитер изготавливает обувь. ", false, false),
 //                Question("У флейты есть струны. ",false, false),
 //                Question("Ежи впадают в спячку. ",true, false),
 //                Question("Лезгинка — грузинское блюдо. ",false, false),
@@ -105,8 +106,8 @@ class Question(val text: String, val answer: Boolean, var questionShowed: Boolea
 //                Question("Греция была столицей Рима. ",false, false),
 //                Question("Волга — это река в Африке. ",false, false),
 //                Question("Кондитер делает сладости.  ",true, false),
-                Question("Тетерев — то же, что глухарь. ",false, false))
+                Question("Тетерев — то же, что глухарь. ", false, false)
+            )
+        }
     }
-
-
 }

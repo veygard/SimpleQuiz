@@ -1,46 +1,40 @@
 package com.veygard.android.geoquiz
 
+
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
+
+private const val TAG = "GameActivity"
 
 class GameActivity : AppCompatActivity() {
     private lateinit var trueButton: Button
     private lateinit var falseButton: Button
     private lateinit var nextButton: ImageButton
-    private lateinit var returnButton: ImageButton
     private lateinit var questionTextView: TextView
     private lateinit var questionAnswerView: TextView
-    private lateinit var questionBank: List<Question>
-    private var currentIndex = 0
-    private var indexSaver = 0
-    private var answerAlreadyDone = false
-    private var score = 0
-
-
+    private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_fragment)
-
-        val question = Question("1", answer = true, questionShowed = false) //пустышка для вызова метода
-        questionBank = question.getQuestionList()
+        Log.d(TAG, "onCreate called")
 
         trueButton = findViewById(R.id.true_button)
         trueButton.setOnClickListener {
-            checkAnswer(currentIndex, true)
-            answerAlreadyDone = true
+            checkAnswer(quizViewModel.currentIndex,true)
         }
         falseButton = findViewById(R.id.false_button)
         falseButton.setOnClickListener {
-            checkAnswer(currentIndex, false)
-            answerAlreadyDone = true
+            checkAnswer(quizViewModel.currentIndex,false)
         }
 
         questionTextView = findViewById(R.id.question_text_view)
@@ -52,58 +46,67 @@ class GameActivity : AppCompatActivity() {
             nextQuestion()
         }
 
-
-//        returnButton = findViewById(R.id.return_button)
-//        returnButton.setBackgroundResource(0)
-//        returnButton.setOnClickListener {
-//            currentIndex = indexSaver
-//            updateQuestion()
-//        }
-        updateQuestion()
+        updateQuestion() //показываем первый вопрос
+        val quizViewModel = ViewModelProvider(this).get(QuizViewModel::class.java)
+        Log.d(TAG, "Got a QuizViewModel: $quizViewModel")
     }
 
     private fun updateQuestion() {
-        questionTextView.text = questionBank[currentIndex].text
+        questionTextView.text = quizViewModel.questionBank[quizViewModel.currentIndex].text
     }
 
 
+
     private fun nextQuestion() {
-        indexSaver = currentIndex
+        //проверяем дан ли ответ
+        if(!quizViewModel.answerAlreadyDone){
+            val toastMessage = Toast.makeText(
+                applicationContext,
+                R.string.first_need_answer,
+                Toast.LENGTH_SHORT
+            )
+            toastMessage.setGravity(Gravity.CENTER_VERTICAL, 0, -200)
+            toastMessage.show()
+            return
+        }
+
         //проверяем сколько вопросов еще не показано
         val questionsIndexNotShownList = mutableListOf<Int>()
-        for ((index, question) in questionBank.withIndex()) {
+        for ((index, question) in quizViewModel.questionBank.withIndex()) {
             if (!question.questionShowed) {
                 questionsIndexNotShownList.add(index)
             }
         }
-        //если все вопросы показаны - заканчиваем игру
+        //если все вопросы показаны переходим на активность итогов
         if (questionsIndexNotShownList.size == 0) {
             val intent = Intent(this, ScoreGameActivity::class.java)
-            intent.putExtra("scoreFinal", score.toString())
+            intent.putExtra("scoreFinal", quizViewModel.score.toString())
             startActivity(intent)
             return
         }
-        //получаем индекс следующего вопроса
         questionAnswerView.text = ""
-        currentIndex = questionsIndexNotShownList[(Math.random() * questionsIndexNotShownList.size).toInt()]
+        //получаем случайный индекс следующего вопроса
+        quizViewModel.currentIndex = questionsIndexNotShownList[(Math.random() * questionsIndexNotShownList.size).toInt()]
         updateQuestion()
         //отмечаем что вопрос уже показывался
-        questionBank[currentIndex].questionShowed = true
-        answerAlreadyDone = false
+        quizViewModel.questionBank[quizViewModel.currentIndex].questionShowed = true
+        quizViewModel.answerAlreadyDone = false
     }
 
 
     private fun checkAnswer(index: Int, check: Boolean) {
-        val checkAnswerStr = if (questionBank[index].answer == check && !answerAlreadyDone) {
-            score++
+        //подготавливаем ответ для тоста
+        val checkAnswerStr = if (quizViewModel.questionBank[index].answer == check && !quizViewModel.answerAlreadyDone) {
+            quizViewModel.score++
             getString(R.string.correct_toast)
-        } else if (!answerAlreadyDone) {
+        } else if (!quizViewModel.answerAlreadyDone) {
             getString(R.string.incorrect_toast)
         } else {
             getString(R.string.already_answered_toast)
         }
 
-        when(questionBank[index].answer){
+        //выводим на экран правильный ответ
+        when(quizViewModel.questionBank[index].answer){
             true -> questionAnswerView.text = getText(R.string.show_answer_correct)
             false -> questionAnswerView.text = getText(R.string.show_answer_incorrect)
         }
@@ -115,10 +118,35 @@ class GameActivity : AppCompatActivity() {
         )
         toastMessage.setGravity(Gravity.CENTER_VERTICAL, 0, -200)
         toastMessage.show()
+
+        quizViewModel.answerAlreadyDone = true
     }
 
+
     fun starOverButtonClick(view: View) {
-        score = 0
+        quizViewModel.score = 0
         startActivity(Intent(this, MainActivity::class.java))
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart called")
+    }
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume() called")
+    }
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause() called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop() called")
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy() called")
     }
 }
