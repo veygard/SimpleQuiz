@@ -22,15 +22,15 @@
         android:layout_gravity="center_horizontal"
         tools:text="Временный текст"
         tools:background="@color/cardview_shadow_end_color"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/question_answer_view"
-        android:gravity="center"
-        android:padding="12dp"
-        android:layout_gravity="center_horizontal"
-        tools:text="Временный текст"
-        tools:background="@color/cardview_shadow_end_color"/>
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/question_answer_view"-->
+<!--        android:gravity="center"-->
+<!--        android:padding="12dp"-->
+<!--        android:layout_gravity="center_horizontal"-->
+<!--        tools:text="Временный текст"-->
+<!--        tools:background="@color/cardview_shadow_end_color"/>-->
 
 
     <LinearLayout

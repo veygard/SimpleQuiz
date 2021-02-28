@@ -9,6 +9,7 @@
     <string name="next_button">Следующий</string>
     <string name="start_button">Начать игру</string>
     <string name="title_app">Вопросы от географа</string>
+    <string name="first_need_answer">Ответьте на вопрос</string>
     <string name="return_button_text">Предыдущий</string>
     <string name="next_question">Next question</string>
     <string name="last_item">last item</string>
