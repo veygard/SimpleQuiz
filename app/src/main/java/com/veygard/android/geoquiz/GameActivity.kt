@@ -1,9 +1,7 @@
 package com.veygard.android.geoquiz
 
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -23,14 +21,19 @@ class GameActivity : AppCompatActivity() {
     private lateinit var falseButton: Button
     private lateinit var nextButton: ImageButton
     private lateinit var questionTextView: TextView
-    private lateinit var questionAnswerView: TextView
-    private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) }
+    private lateinit var questionNum: TextView
+    private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) } //для сохранения параметров при приостановке апп
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_fragment)
         Log.d(TAG, "onCreate called")
 
+        questionNum = findViewById(R.id.questions_numbers)
+        //выводим сколько вопросов осталось
+        questionNum.text = getString(R.string.text_num_of_questions,quizViewModel.numOfQuestions,quizViewModel.questionBank.size)
+
+        questionTextView = findViewById(R.id.question_text_view)
         trueButton = findViewById(R.id.true_button)
         trueButton.setOnClickListener {
             checkAnswer(quizViewModel.currentIndex, true)
@@ -39,9 +42,6 @@ class GameActivity : AppCompatActivity() {
         falseButton.setOnClickListener {
             checkAnswer(quizViewModel.currentIndex, false)
         }
-
-        questionTextView = findViewById(R.id.question_text_view)
-
         nextButton = findViewById(R.id.next_button)
         nextButton.setBackgroundResource(0)
         nextButton.setOnClickListener {
@@ -49,7 +49,8 @@ class GameActivity : AppCompatActivity() {
         }
 
         updateQuestion() //показываем первый вопрос
-        val quizViewModel = ViewModelProvider(this).get(QuizViewModel::class.java)
+
+//        val quizViewModel = ViewModelProvider(this).get(QuizViewModel::class.java)
         Log.d(TAG, "Got a QuizViewModel: $quizViewModel")
     }
 
@@ -66,7 +67,7 @@ class GameActivity : AppCompatActivity() {
                 R.string.first_need_answer,
                 Toast.LENGTH_SHORT
             )
-            toastMessage.setGravity(Gravity.CENTER_VERTICAL, 0, -200)
+            toastMessage.setGravity(Gravity.TOP, 0, 200)
             toastMessage.show()
             return
         }
@@ -85,16 +86,23 @@ class GameActivity : AppCompatActivity() {
             startActivity(intent)
             return
         }
+        quizViewModel.numOfQuestions = questionsIndexNotShownList.size
+        val numText = "${getString(R.string.text_num_of_questions,quizViewModel.numOfQuestions,quizViewModel.questionBank.size)} \n ${getString(R.string.text_result_score,
+            quizViewModel.score
+        )}"
+        questionNum.text = numText
+
         //получаем случайный индекс следующего вопроса
         quizViewModel.currentIndex =
             questionsIndexNotShownList[(Math.random() * questionsIndexNotShownList.size).toInt()]
         updateQuestion()
+
         //отмечаем что вопрос уже показывался
         quizViewModel.questionBank[quizViewModel.currentIndex].questionShowed = true
         quizViewModel.answerAlreadyDone = false
-        val color = ContextCompat.getColor(applicationContext, R.color.colorPrimary)
-        trueButton.setBackgroundColor(color)
-        falseButton.setBackgroundColor(color)
+        val colorPrimary = ContextCompat.getColor(applicationContext, R.color.colorPrimary)
+        trueButton.setBackgroundColor(colorPrimary)
+        falseButton.setBackgroundColor(colorPrimary)
     }
 
 
@@ -111,7 +119,7 @@ class GameActivity : AppCompatActivity() {
                 getString(R.string.already_answered_toast)
             }
 
-        //выводим на экран правильный ответ
+        //меняем цвет кнопок, указываем на правильный ответ
         val colorCorrectAnswer = ContextCompat.getColor(applicationContext, R.color.correct_answer)
         val colorIncorrectAnswer = ContextCompat.getColor(applicationContext, R.color.incorrect_answer)
         when (quizViewModel.questionBank[index].answer) {
@@ -131,7 +139,7 @@ class GameActivity : AppCompatActivity() {
             checkAnswerStr,
             Toast.LENGTH_SHORT
         )
-        toastMessage.setGravity(Gravity.CENTER_VERTICAL, 0, -200)
+        toastMessage.setGravity(Gravity.TOP, 0, 200)
         toastMessage.show()
         quizViewModel.answerAlreadyDone = true
 

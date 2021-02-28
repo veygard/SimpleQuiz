@@ -17,8 +17,10 @@ class ScoreGameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_score_game)
         scoreBoardTextView = findViewById(R.id.score_board_textview)
+        scoreBoardTextView.text = getString(R.string.text_result_score,
+            intent.extras?.getString("scoreFinal")?.toInt()
+        )
 
-        scoreBoardTextView.text = "${getString(R.string.text_result_score)} ${intent.extras?.getString("scoreFinal")} ${getString(R.string.text_result_score_ending)}"
     }
     fun starOverButtonClickInScore(view: View) {
         quizViewModel.score = 0

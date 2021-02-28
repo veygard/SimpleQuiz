@@ -12,4 +12,5 @@ class QuizViewModel() : ViewModel() {
     var score = 0
     var questionBank = Question.getQuestionList()
     var answerAlreadyDone = false
+    var numOfQuestions = questionBank.size
 }
