@@ -51,4 +51,5 @@
         app:layout_constraintTop_toBottomOf="@+id/score_board_textview"
         app:layout_constraintVertical_bias="0.348" />
 
+
 </androidx.constraintlayout.widget.ConstraintLayout>
