@@ -18,6 +18,12 @@ import androidx.lifecycle.ViewModelProvider
 
 
 private const val TAG = "GameActivity"
+private const val CURRENT_INDEX = "currentIndex"
+private const val SCORE = "score"
+private const val QUESTION_BANK = "questionBank"
+private const val ANSWER_ALREADY_DONE = "answerAlreadyDone"
+private const val GAME_STARTED = "gameStarted"
+
 
 class GameActivity : AppCompatActivity() {
     private lateinit var trueButton: Button
@@ -26,7 +32,6 @@ class GameActivity : AppCompatActivity() {
     private lateinit var questionTextView: TextView
     private lateinit var questionNumTextView: TextView
     private lateinit var scoreTextView: TextView
-
     private lateinit var animClick: Animation //анимация кнопки нажатия
 
     private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) } //для сохранения параметров при приостановке апп
@@ -39,21 +44,21 @@ class GameActivity : AppCompatActivity() {
         trueButton = findViewById(R.id.true_button)
         trueButton.setOnClickListener {
             checkAnswer(quizViewModel.currentIndex, true)
-            animClick = AnimationUtils.loadAnimation(this,R.anim.click_animation)
+            animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
             trueButton.startAnimation(animClick)
         }
 
         falseButton = findViewById(R.id.false_button)
         falseButton.setOnClickListener {
             checkAnswer(quizViewModel.currentIndex, false)
-            animClick = AnimationUtils.loadAnimation(this,R.anim.click_animation)
+            animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
             falseButton.startAnimation(animClick)
         }
         nextButton = findViewById(R.id.next_button)
         nextButton.setBackgroundResource(0)
         nextButton.setOnClickListener {
             nextQuestion()
-            animClick = AnimationUtils.loadAnimation(this,R.anim.click_animation)
+            animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
             nextButton.startAnimation(animClick)
         }
 
@@ -61,19 +66,11 @@ class GameActivity : AppCompatActivity() {
 
         questionNumTextView = findViewById(R.id.questions_numbers)
         //выводим сколько вопросов осталось
-        questionNumTextView.text = getString(
-            R.string.text_num_of_questions,
-            quizViewModel.numOfQuestions,
-            quizViewModel.questionBank.size
-        )
+        questionNumTextView.text = getQuestionNumText()
         //выводим результат
         scoreTextView = findViewById(R.id.score_board_textview)
-        scoreTextView.text = getString(
-            R.string.text_result_score,
-            quizViewModel.score
-        )
+        scoreTextView.text = getScoreText()
     }
-
 
 
     private fun updateQuestion() {
@@ -108,15 +105,8 @@ class GameActivity : AppCompatActivity() {
             return
         }
         quizViewModel.numOfQuestions = questionsIndexNotShownList.size
-        questionNumTextView.text = getString(
-            R.string.text_num_of_questions,
-            quizViewModel.numOfQuestions,
-            quizViewModel.questionBank.size
-        )
-        scoreTextView.text = getString(
-            R.string.text_result_score,
-            quizViewModel.score
-        )
+        questionNumTextView.text = getQuestionNumText()
+        scoreTextView.text = getScoreText()
 
         //получаем случайный индекс следующего вопроса
         quizViewModel.currentIndex =
@@ -125,6 +115,8 @@ class GameActivity : AppCompatActivity() {
 
         //отмечаем что вопрос уже показывался
         quizViewModel.questionBank[quizViewModel.currentIndex].questionShowed = true
+
+        //откатываем проверку на повторное нажатие
         quizViewModel.answerAlreadyDone = false
         val colorPrimary = ContextCompat.getColor(applicationContext, R.color.colorPrimary)
         trueButton.setBackgroundColor(colorPrimary)
@@ -132,32 +124,25 @@ class GameActivity : AppCompatActivity() {
     }
 
 
-
-
     private fun checkAnswer(index: Int, check: Boolean) {
         //подготавливаем ответ для тоста
-
         val checkAnswerStr: String
-            if (quizViewModel.questionBank[index].answer == check && !quizViewModel.answerAlreadyDone) {
-                quizViewModel.score++
-                checkAnswerStr =  getString(R.string.correct_toast)
-                //обновляем результат
-                scoreTextView.text = getString(
-                    R.string.text_result_score,
-                    quizViewModel.score
-                )
-            } else if (!quizViewModel.answerAlreadyDone) {
-                checkAnswerStr = getString(R.string.incorrect_toast)
-            } else {
-                checkAnswerStr = getString(R.string.already_answered_toast)
-            }
+        if (quizViewModel.questionBank[index].answer == check && !quizViewModel.answerAlreadyDone) {
+            quizViewModel.score++
+            checkAnswerStr = getString(R.string.correct_toast)
+            //обновляем поле результата
+            scoreTextView.text = getScoreText()
+        } else if (!quizViewModel.answerAlreadyDone) {
+            checkAnswerStr = getString(R.string.incorrect_toast)
+        } else {
+            checkAnswerStr = getString(R.string.already_answered_toast)
+        }
 
-        //меняем цвет кнопок, указываем на правильный ответ
+        //цвета для изменения кнопок
         val colorCorrectAnswer = ContextCompat.getColor(applicationContext, R.color.correct_answer)
-        val colorIncorrectAnswer = ContextCompat.getColor(
-            applicationContext,
-            R.color.incorrect_answer
-        )
+        val colorIncorrectAnswer =
+            ContextCompat.getColor(applicationContext, R.color.incorrect_answer)
+        //меняем цвет кнопок (указываем на правильный ответ)
         when (quizViewModel.questionBank[index].answer) {
             true -> {
                 trueButton.setBackgroundColor(colorCorrectAnswer)
@@ -179,12 +164,38 @@ class GameActivity : AppCompatActivity() {
         quizViewModel.answerAlreadyDone = true
     }
 
+    //методы получения текста для отображения кол-ва вопросов и текущий результат
+    private fun getQuestionNumText(): String = getString(
+        R.string.text_num_of_questions,
+        quizViewModel.numOfQuestions,
+        quizViewModel.questionBank.size
+    )
 
 
-    fun starOverButtonClick(view: View) {
+    private fun getScoreText(): String = getString(
+        R.string.text_score,
+        quizViewModel.score
+    )
+
+
+    fun startOver() {
         quizViewModel.score = 0
+        quizViewModel.gameStarted = false
         startActivity(Intent(this, MainActivity::class.java))
     }
+
+    //При нажатии кнопки заново или нажатии кнопки назад - вызываем диалог
+    fun starOverButtonClick(view: View) {
+        val dialog = BackPressedDialogFragment()
+        val manager = supportFragmentManager
+        dialog.show(manager, "")
+    }
+    override fun onBackPressed() {
+        val dialog = BackPressedDialogFragment()
+        val manager = supportFragmentManager
+        dialog.show(manager, "")
+    }
+
 
     override fun onStart() {
         super.onStart()

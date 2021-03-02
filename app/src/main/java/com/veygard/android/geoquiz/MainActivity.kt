@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+
 private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
-
+    private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) }
 
 
 
@@ -16,7 +18,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate called")
         setContentView(R.layout.activity_main)
-
     }
 
     override fun onStart() {
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     fun startButtonClick(view: View) {
         startActivity(Intent(this, GameActivity::class.java))
+        quizViewModel.gameStarted = true
     }
 }
 

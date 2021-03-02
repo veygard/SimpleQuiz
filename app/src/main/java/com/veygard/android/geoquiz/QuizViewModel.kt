@@ -13,4 +13,5 @@ class QuizViewModel() : ViewModel() {
     var questionBank = Question.getQuestionList()
     var answerAlreadyDone = false
     var numOfQuestions = questionBank.size
+    var gameStarted = false
 }
