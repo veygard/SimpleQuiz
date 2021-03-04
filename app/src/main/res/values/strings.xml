@@ -13,7 +13,7 @@
     <string name="return_button_text">Предыдущий</string>
     <string name="next_question">Next question</string>
     <string name="last_item">last item</string>
-    <string name="start_over">Заново</string>
+    <string name="start_over">Начать заново</string>
     <string name="show_answer_correct">Правильный ответ: правда</string>
     <string name="show_answer_incorrect">Правильный ответ: не правда</string>
     <string name="text_result_title">Результаты игры:</string>

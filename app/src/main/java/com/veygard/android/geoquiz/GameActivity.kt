@@ -1,6 +1,7 @@
 package com.veygard.android.geoquiz
 
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -38,7 +39,7 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game_fragment)
+        setContentView(R.layout.activity_game_new)
 
         questionTextView = findViewById(R.id.question_text_view)
         trueButton = findViewById(R.id.true_button)
@@ -107,20 +108,20 @@ class GameActivity : AppCompatActivity() {
         quizViewModel.numOfQuestions = questionsIndexNotShownList.size
         questionNumTextView.text = getQuestionNumText()
         scoreTextView.text = getScoreText()
-
         //получаем случайный индекс следующего вопроса
         quizViewModel.currentIndex =
             questionsIndexNotShownList[(Math.random() * questionsIndexNotShownList.size).toInt()]
         updateQuestion()
-
         //отмечаем что вопрос уже показывался
         quizViewModel.questionBank[quizViewModel.currentIndex].questionShowed = true
-
-        //откатываем проверку на повторное нажатие
+        //откатываем проверку на повторное нажатие и меняём цвет кнопок на дефолтные
         quizViewModel.answerAlreadyDone = false
         val colorPrimary = ContextCompat.getColor(applicationContext, R.color.colorPrimary)
         trueButton.setBackgroundColor(colorPrimary)
         falseButton.setBackgroundColor(colorPrimary)
+        //анимация поворота нового вопроса
+        animClick = AnimationUtils.loadAnimation(this, R.anim.anim_translate)
+        questionTextView.startAnimation(animClick)
     }
 
 
@@ -185,7 +186,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     //При нажатии кнопки заново или нажатии кнопки назад - вызываем диалог
-    fun starOverButtonClick(view: View) {
+    fun starOverButtonClick() {
         val dialog = BackPressedDialogFragment()
         val manager = supportFragmentManager
         dialog.show(manager, "")
@@ -215,6 +216,7 @@ class GameActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onStop() called")
+
     }
 
     override fun onDestroy() {
