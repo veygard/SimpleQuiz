@@ -1,7 +1,6 @@
 package com.veygard.android.geoquiz
 
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -16,14 +15,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import kotlin.random.Random
 
 
 private const val TAG = "GameActivity"
 
 
 class GameActivity : AppCompatActivity() {
-    private lateinit var trueButton: Button
-    private lateinit var falseButton: Button
+    private lateinit var answerButton1: Button
+    private lateinit var answerButton2: Button
+    private lateinit var answerButton3: Button
+    private lateinit var answerButton4: Button
     private lateinit var nextButton: ImageButton
     private lateinit var questionTextView: TextView
     private lateinit var questionNumTextView: TextView
@@ -34,22 +36,39 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game_new)
+        setContentView(R.layout.activity_game)
 
         questionTextView = findViewById(R.id.question_text_view)
-        trueButton = findViewById(R.id.true_button)
-        trueButton.setOnClickListener {
-            checkAnswer(quizViewModel.currentIndex, true)
+        answerButton1 = findViewById(R.id.first_answer_button)
+        answerButton1.setOnClickListener {
+            checkAnswer(quizViewModel.currentIndex, answerButton1.text.toString())
             animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
-            trueButton.startAnimation(animClick)
+            answerButton1.startAnimation(animClick)
+            answerButton1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_check_24, 0, 0, 0);
         }
 
-        falseButton = findViewById(R.id.false_button)
-        falseButton.setOnClickListener {
-            checkAnswer(quizViewModel.currentIndex, false)
+        answerButton2 = findViewById(R.id.second_answer_button)
+        answerButton2.setOnClickListener {
+            checkAnswer(quizViewModel.currentIndex, answerButton2.text.toString())
             animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
-            falseButton.startAnimation(animClick)
+            answerButton2.startAnimation(animClick)
+            answerButton2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_check_24, 0, 0, 0);
         }
+        answerButton3 = findViewById(R.id.third_answer_button)
+        answerButton3.setOnClickListener {
+            checkAnswer(quizViewModel.currentIndex, answerButton3.text.toString())
+            animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
+            answerButton3.startAnimation(animClick)
+            answerButton3.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_check_24, 0, 0, 0);
+        }
+        answerButton4 = findViewById(R.id.fourth_answer_button)
+        answerButton4.setOnClickListener {
+            checkAnswer(quizViewModel.currentIndex, answerButton4.text.toString())
+            animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
+            answerButton4.startAnimation(animClick)
+            answerButton4.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_check_24, 0, 0, 0);
+        }
+
         nextButton = findViewById(R.id.next_button)
         nextButton.setBackgroundResource(0)
         nextButton.setOnClickListener {
@@ -58,7 +77,7 @@ class GameActivity : AppCompatActivity() {
             nextButton.startAnimation(animClick)
         }
 
-        updateQuestion() //показываем первый вопрос
+        updateQuestionAndAnswers() //показываем первый вопрос
 
         questionNumTextView = findViewById(R.id.questions_numbers)
         //выводим сколько вопросов осталось
@@ -68,11 +87,74 @@ class GameActivity : AppCompatActivity() {
         scoreTextView.text = getScoreText()
     }
 
+    private fun updateQuestionAndAnswers() {
+        val index = quizViewModel.currentIndex
 
-    private fun updateQuestion() {
-        questionTextView.text = quizViewModel.questionBank[quizViewModel.currentIndex].text
+        questionTextView.text = quizViewModel.questionBank[index].text
+
+        //Сохраняем текст правильного ответа
+        quizViewModel.correctAnswer = quizViewModel.questionBank[index].correctAnswer
+
+        //массив ответов на вопрос
+        val answersArray = arrayOf(
+            quizViewModel.questionBank[index].correctAnswer,
+            quizViewModel.questionBank[index].answer2,
+            quizViewModel.questionBank[index].answer3,
+            quizViewModel.questionBank[index].answer4
+        )
+        //формируем случайный индекс для ответов и заполняем кнопки текстом ответов
+        val randomOrderAnswersArray = randomSortAnswersArray(answersArray)
+        answerButton1.text = randomOrderAnswersArray[0]
+        answerButton2.text = randomOrderAnswersArray[1]
+        answerButton3.text = randomOrderAnswersArray[2]
+        answerButton4.text = randomOrderAnswersArray[3]
+
+        //отмечаем индекс правильной кнопки
+        var count = 0
+        randomOrderAnswersArray.forEach { str ->
+            if (str == quizViewModel.correctAnswer) {
+                quizViewModel.numOfButtonWithCorrectAnswer = count
+            }
+            count++
+        }
     }
 
+    private fun randomSortAnswersArray(array: Array<String>): Array<String> {
+        val sortedArray = arrayOf("", "", "", "")
+        var sortDone = false
+        while (!sortDone) {
+            returnHere@ while (!sortDone) {
+                val randomNum = Random.nextInt(0, 4)
+                if (sortedArray[0] == "") {
+                    sortedArray[0] = array[randomNum]
+                    array[randomNum] = "taken"
+                    break@returnHere
+                }
+                if (sortedArray[1] == "") {
+                    if (array[randomNum] != "taken") {
+                        sortedArray[1] = array[randomNum]
+                        array[randomNum] = "taken"
+                    } else {
+                        break@returnHere
+                    }
+                }
+                if (sortedArray[2] == "") {
+                    if (array[randomNum] != "taken") {
+                        sortedArray[2] = array[randomNum]
+                        array[randomNum] = "taken"
+                    } else {
+                        break@returnHere
+                    }
+                }
+                for (str in array)
+                    if (str != "taken") {
+                        sortedArray[3] = str
+                        sortDone = true
+                    }
+            }
+        }
+        return sortedArray
+    }
 
     private fun nextQuestion() {
         //проверяем дан ли ответ
@@ -106,24 +188,38 @@ class GameActivity : AppCompatActivity() {
         //получаем случайный индекс следующего вопроса
         quizViewModel.currentIndex =
             questionsIndexNotShownList[(Math.random() * questionsIndexNotShownList.size).toInt()]
-        updateQuestion()
+        updateQuestionAndAnswers()
         //отмечаем что вопрос уже показывался
         quizViewModel.questionBank[quizViewModel.currentIndex].questionShowed = true
+
         //откатываем проверку на повторное нажатие и меняём цвет кнопок на дефолтные
         quizViewModel.answerAlreadyDone = false
         val colorPrimary = ContextCompat.getColor(applicationContext, R.color.colorPrimary)
-        trueButton.setBackgroundColor(colorPrimary)
-        falseButton.setBackgroundColor(colorPrimary)
+        answerButton1.setBackgroundColor(colorPrimary)
+        answerButton2.setBackgroundColor(colorPrimary)
+        answerButton3.setBackgroundColor(colorPrimary)
+        answerButton4.setBackgroundColor(colorPrimary)
         //анимация поворота нового вопроса
         animClick = AnimationUtils.loadAnimation(this, R.anim.anim_translate)
         questionTextView.startAnimation(animClick)
+
+        removeDrawableFromButtons()
+    }
+
+    private fun removeDrawableFromButtons(){
+        answerButton1.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        answerButton2.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        answerButton3.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        answerButton4.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
     }
 
 
-    private fun checkAnswer(index: Int, check: Boolean) {
+    private fun checkAnswer(index: Int, answer: String) {
         //подготавливаем ответ для тоста
+        val correctAnswer = quizViewModel.correctAnswer
+
         val checkAnswerStr: String
-        if (quizViewModel.questionBank[index].answer == check && !quizViewModel.answerAlreadyDone) {
+        if (answer == correctAnswer && !quizViewModel.answerAlreadyDone) {
             quizViewModel.score++
             checkAnswerStr = getString(R.string.correct_toast)
             //обновляем поле результата
@@ -134,21 +230,8 @@ class GameActivity : AppCompatActivity() {
             checkAnswerStr = getString(R.string.already_answered_toast)
         }
 
-        //цвета для изменения кнопок
-        val colorCorrectAnswer = ContextCompat.getColor(applicationContext, R.color.correct_answer)
-        val colorIncorrectAnswer =
-            ContextCompat.getColor(applicationContext, R.color.incorrect_answer)
-        //меняем цвет кнопок (указываем на правильный ответ)
-        when (quizViewModel.questionBank[index].answer) {
-            true -> {
-                trueButton.setBackgroundColor(colorCorrectAnswer)
-                falseButton.setBackgroundColor(colorIncorrectAnswer)
-            }
-            false -> {
-                trueButton.setBackgroundColor(colorIncorrectAnswer)
-                falseButton.setBackgroundColor(colorCorrectAnswer)
-            }
-        }
+        //меняем цвет кнопок
+        changeButtonColorsAfterAnswer()
 
         val toastMessage = Toast.makeText(
             applicationContext,
@@ -158,6 +241,29 @@ class GameActivity : AppCompatActivity() {
         toastMessage.setGravity(Gravity.TOP, 0, 200)
         toastMessage.show()
         quizViewModel.answerAlreadyDone = true
+    }
+
+    //у правильного ответа ставим цвет зеленый, остальные серые
+    private fun changeButtonColorsAfterAnswer() {
+        val colorCorrectAnswer = ContextCompat.getColor(applicationContext, R.color.correct_answer)
+        val colorIncorrectAnswer =
+            ContextCompat.getColor(applicationContext, R.color.incorrect_answer)
+
+        answerButton1.setBackgroundColor(colorIncorrectAnswer)
+        answerButton2.setBackgroundColor(colorIncorrectAnswer)
+        answerButton3.setBackgroundColor(colorIncorrectAnswer)
+        answerButton4.setBackgroundColor(colorIncorrectAnswer)
+
+        when (quizViewModel.numOfButtonWithCorrectAnswer) {
+            0 -> answerButton1.setBackgroundColor(colorCorrectAnswer)
+            1 -> answerButton2.setBackgroundColor(colorCorrectAnswer)
+            2 -> answerButton3.setBackgroundColor(colorCorrectAnswer)
+            3 -> answerButton4.setBackgroundColor(colorCorrectAnswer)
+        }
+    }
+
+    private fun formAnswers() {
+
     }
 
     //методы получения текста для отображения кол-ва вопросов и текущий результат
@@ -181,11 +287,12 @@ class GameActivity : AppCompatActivity() {
     }
 
     //При нажатии кнопки заново или нажатии кнопки назад - вызываем диалог
-    fun starOverButtonClick() {
+    fun starOverButtonClick(view: View) {
         val dialog = BackPressedDialogFragment()
         val manager = supportFragmentManager
         dialog.show(manager, "")
     }
+
     override fun onBackPressed() {
         val dialog = BackPressedDialogFragment()
         val manager = supportFragmentManager

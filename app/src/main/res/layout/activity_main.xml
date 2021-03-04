@@ -36,7 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/start_button"
-                android:id="@+id/false_button"
+                android:id="@+id/second_answer_button"
                 android:onClick="startButtonClick"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"

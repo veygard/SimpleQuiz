@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Simple Quiz</string>
     <string name="question_text">Текст вопроса: придумать</string>
-    <string name="true_button">Правда</string>
-    <string name="false_button">Не правда</string>
+    <string name="first_answer_text"> </string>
+    <string name="second_answer_text"> </string>
     <string name="correct_toast">Вы ответили верно</string>
     <string name="incorrect_toast">Вы ответили не верно</string>
     <string name="already_answered_toast">Вы уже отвечали</string>
@@ -20,5 +20,7 @@
     <string name="text_score">Правильных ответов: %1$d.</string>
     <string name="text_result_score">Правильных ответов: %1$d из %2$d.</string>
     <string name="text_num_of_questions">Осталось %1$d вопросов из %2$d.</string>
+    <string name="third_answer_text" />
+    <string name="fourth_answer_text" />
 
 </resources>

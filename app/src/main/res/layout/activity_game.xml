@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:background="#FFE082"
+    android:fillViewport="true"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFE082"
+        >
+
+        <Button
+            android:id="@+id/start_over"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:onClick="starOverButtonClick"
+            android:text="@string/start_over"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/questions_numbers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            tools:text="@tools:sample/lorem/random"
+            android:background="#FFE082"
+            android:gravity="center"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@+id/start_over"
+            />
+
+        <TextView
+            android:id="@+id/question_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:background="#C5E1A5"
+            android:gravity="center"
+            android:padding="24dp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/questions_numbers"
+            tools:text="Временный текст" />
+
+
+        <Button
+            android:id="@+id/first_answer_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/first_answer_text"
+            app:layout_constraintEnd_toStartOf="@+id/second_answer_button"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/question_text_view"
+            tools:text="1 ответ" />
+
+        <Button
+            android:id="@+id/second_answer_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:text="@string/second_answer_text"
+            app:layout_constraintBottom_toBottomOf="@id/first_answer_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toEndOf="@+id/first_answer_button"
+            app:layout_constraintTop_toTopOf="@+id/first_answer_button"
+            tools:text="2 ответ" />
+
+        <Button
+            android:id="@+id/third_answer_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/third_answer_text"
+            app:layout_constraintEnd_toEndOf="@+id/first_answer_button"
+            app:layout_constraintStart_toStartOf="@+id/first_answer_button"
+            app:layout_constraintTop_toBottomOf="@+id/first_answer_button"
+            tools:text="3 ответ" />
+
+        <Button
+            android:id="@+id/fourth_answer_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/fourth_answer_text"
+            app:layout_constraintStart_toEndOf="@+id/third_answer_button"
+            app:layout_constraintEnd_toEndOf="@id/second_answer_button"
+            app:layout_constraintTop_toTopOf="@+id/third_answer_button"
+            app:layout_constraintBottom_toBottomOf="@id/third_answer_button"
+            tools:text="4 ответ" />
+
+
+        <ImageButton
+            android:id="@+id/next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/next_question"
+            android:drawablePadding="10dp"
+            android:src="@mipmap/ic_next_question"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fourth_answer_button" />
+
+        <TextView
+            android:id="@+id/score_board_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="8dp"
+            android:background="#FFE082"
+            android:gravity="center"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+
+            app:layout_constraintEnd_toEndOf="@id/question_text_view"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@id/question_text_view"
+            app:layout_constraintTop_toBottomOf="@id/next_button"
+            tools:text="Временный текст" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
