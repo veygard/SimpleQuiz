@@ -7,13 +7,14 @@
     android:background="#FFE082">
 
     <Button
-        android:id="@+id/start_over"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:id="@+id/start_over"
         android:onClick="starOverButtonClick"
         android:text="@string/start_over"
+
         android:textStyle="bold"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

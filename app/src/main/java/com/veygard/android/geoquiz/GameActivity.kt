@@ -181,7 +181,8 @@ class GameActivity : AppCompatActivity() {
     }
 
     //При нажатии кнопки заново или нажатии кнопки назад - вызываем диалог
-    fun starOverButtonClick() {
+    @Suppress("UNUSED_PARAMETER")
+    fun starOverButtonClick(veiw: View) {
         val dialog = BackPressedDialogFragment()
         val manager = supportFragmentManager
         dialog.show(manager, "")
