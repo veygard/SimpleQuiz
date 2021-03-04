@@ -19,11 +19,6 @@ import androidx.lifecycle.ViewModelProvider
 
 
 private const val TAG = "GameActivity"
-private const val CURRENT_INDEX = "currentIndex"
-private const val SCORE = "score"
-private const val QUESTION_BANK = "questionBank"
-private const val ANSWER_ALREADY_DONE = "answerAlreadyDone"
-private const val GAME_STARTED = "gameStarted"
 
 
 class GameActivity : AppCompatActivity() {
