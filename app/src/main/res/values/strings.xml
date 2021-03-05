@@ -22,5 +22,14 @@
     <string name="text_num_of_questions">Осталось %1$d вопросов из %2$d.</string>
     <string name="third_answer_text" />
     <string name="fourth_answer_text" />
+    <string name="activity_main_title">Настройка игры:</string>
+    <string name="text_set_num_question">Количество\nвопросов</string>
+    <string name="main_text_num_question">Выберите</string>
 
+    <string-array name="NumQuestionsSpinner">
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+    </string-array>
 </resources>

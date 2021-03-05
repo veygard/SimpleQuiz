@@ -10,10 +10,11 @@ private const val TAG = "QuizViewModel"
 class QuizViewModel() : ViewModel() {
     var currentIndex = 0
     var score = 0
-    var questionBank = Question.getQuestionList()
+    var questionBank : List<Question> = Question.questionListForGame
     var answerAlreadyDone = false
-    var numOfQuestions = questionBank.size
+    var numOfQuestionsForTextView = questionBank.size
     var gameStarted = false
     var correctAnswer: String = ""
     var numOfButtonWithCorrectAnswer = -1
+    var numOfQuestionsAtStart = 10
 }

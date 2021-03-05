@@ -15,7 +15,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import kotlin.random.Random
 
 
 private const val TAG = "GameActivity"
@@ -31,7 +30,6 @@ class GameActivity : AppCompatActivity() {
     private lateinit var questionNumTextView: TextView
     private lateinit var scoreTextView: TextView
     private lateinit var animClick: Animation //анимация кнопки нажатия
-
     private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) } //для сохранения параметров при приостановке апп
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,58 +100,21 @@ class GameActivity : AppCompatActivity() {
             quizViewModel.questionBank[index].answer3,
             quizViewModel.questionBank[index].answer4
         )
-        //формируем случайный индекс для ответов и заполняем кнопки текстом ответов
-        val randomOrderAnswersArray = randomSortAnswersArray(answersArray)
-        answerButton1.text = randomOrderAnswersArray[0]
-        answerButton2.text = randomOrderAnswersArray[1]
-        answerButton3.text = randomOrderAnswersArray[2]
-        answerButton4.text = randomOrderAnswersArray[3]
+
+       answersArray.shuffle()
+        answerButton1.text = answersArray[0]
+        answerButton2.text = answersArray[1]
+        answerButton3.text = answersArray[2]
+        answerButton4.text = answersArray[3]
 
         //отмечаем индекс правильной кнопки
         var count = 0
-        randomOrderAnswersArray.forEach { str ->
+        answersArray.forEach { str ->
             if (str == quizViewModel.correctAnswer) {
                 quizViewModel.numOfButtonWithCorrectAnswer = count
             }
             count++
         }
-    }
-
-    private fun randomSortAnswersArray(array: Array<String>): Array<String> {
-        val sortedArray = arrayOf("", "", "", "")
-        var sortDone = false
-        while (!sortDone) {
-            returnHere@ while (!sortDone) {
-                val randomNum = Random.nextInt(0, 4)
-                if (sortedArray[0] == "") {
-                    sortedArray[0] = array[randomNum]
-                    array[randomNum] = "taken"
-                    break@returnHere
-                }
-                if (sortedArray[1] == "") {
-                    if (array[randomNum] != "taken") {
-                        sortedArray[1] = array[randomNum]
-                        array[randomNum] = "taken"
-                    } else {
-                        break@returnHere
-                    }
-                }
-                if (sortedArray[2] == "") {
-                    if (array[randomNum] != "taken") {
-                        sortedArray[2] = array[randomNum]
-                        array[randomNum] = "taken"
-                    } else {
-                        break@returnHere
-                    }
-                }
-                for (str in array)
-                    if (str != "taken") {
-                        sortedArray[3] = str
-                        sortDone = true
-                    }
-            }
-        }
-        return sortedArray
     }
 
     private fun nextQuestion() {
@@ -182,7 +143,7 @@ class GameActivity : AppCompatActivity() {
             startActivity(intent)
             return
         }
-        quizViewModel.numOfQuestions = questionsIndexNotShownList.size
+        quizViewModel.numOfQuestionsForTextView = questionsIndexNotShownList.size
         questionNumTextView.text = getQuestionNumText()
         scoreTextView.text = getScoreText()
         //получаем случайный индекс следующего вопроса
@@ -262,14 +223,10 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private fun formAnswers() {
-
-    }
-
     //методы получения текста для отображения кол-ва вопросов и текущий результат
     private fun getQuestionNumText(): String = getString(
         R.string.text_num_of_questions,
-        quizViewModel.numOfQuestions,
+        quizViewModel.numOfQuestionsForTextView,
         quizViewModel.questionBank.size
     )
 
@@ -298,7 +255,6 @@ class GameActivity : AppCompatActivity() {
         val manager = supportFragmentManager
         dialog.show(manager, "")
     }
-
 
     override fun onStart() {
         super.onStart()
