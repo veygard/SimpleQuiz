@@ -3,6 +3,8 @@ package com.veygard.android.geoquiz
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -30,11 +32,15 @@ class GameActivity : AppCompatActivity() {
     private lateinit var questionNumTextView: TextView
     private lateinit var scoreTextView: TextView
     private lateinit var animClick: Animation //анимация кнопки нажатия
+    private var hardModeStatus = false
     private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) } //для сохранения параметров при приостановке апп
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        //чекаем статус сложной игры
+        hardModeStatus = intent.extras?.getBoolean("hardModeStatus") ?: false
 
         //добавляем кнопки
         questionTextView = findViewById(R.id.question_text_view)
@@ -42,7 +48,7 @@ class GameActivity : AppCompatActivity() {
         answerButton1.setOnClickListener {
             answerButtonListenerAction(answerButton1)
         }
-        answerButton2 = findViewById(R.id.second_answer_button)
+        answerButton2 = findViewById(R.id.start_game_button)
         answerButton2.setOnClickListener {
             answerButtonListenerAction(answerButton2)
         }
@@ -75,7 +81,12 @@ class GameActivity : AppCompatActivity() {
     //метод для слушателя, который проверяет ответ, включает анимацию нажатия, и рисует галочку на кнопке
     private fun answerButtonListenerAction(button: Button) {
         if (!quizViewModel.answerAlreadyDone) {
-            button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_check_24, 0, 0, 0);
+            button.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_baseline_check_24,
+                0,
+                0,
+                0
+            );
         }
         checkAnswer(quizViewModel.currentIndex, button.text.toString())
         animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
@@ -132,10 +143,7 @@ class GameActivity : AppCompatActivity() {
         }
         //если все вопросы показаны переходим на активность итогов
         if (questionsIndexNotShownList.size == 0) {
-            val intent = Intent(this, ScoreGameActivity::class.java)
-            //передаём сумму правильных ответов
-            intent.putExtra("scoreFinal", quizViewModel.score.toString())
-            startActivity(intent)
+            gameOver()
             return
         }
         quizViewModel.numOfQuestionsForTextView = questionsIndexNotShownList.size
@@ -169,6 +177,13 @@ class GameActivity : AppCompatActivity() {
         answerButton4.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
     }
 
+    private fun gameOver() {
+        val intent = Intent(this, ScoreGameActivity::class.java)
+        //передаём сумму правильных ответов
+        intent.putExtra("scoreFinal", quizViewModel.score.toString())
+        startActivity(intent)
+    }
+
 
     private fun checkAnswer(index: Int, answer: String) {
         val correctAnswer = quizViewModel.correctAnswer
@@ -176,6 +191,19 @@ class GameActivity : AppCompatActivity() {
             quizViewModel.score++
             //обновляем поле результата
             scoreTextView.text = getScoreText()
+        } else if (answer != correctAnswer) {
+            if (hardModeStatus) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val toastMessage = Toast.makeText(
+                        applicationContext,
+                        R.string.incorrect_toast,
+                        Toast.LENGTH_LONG
+                    )
+                    toastMessage.setGravity(Gravity.TOP, 0, 200)
+                    toastMessage.show()
+                    gameOver()
+                }, 1000)
+            }
         }
         //меняем цвет кнопок
         changeButtonColorsAfterAnswer()

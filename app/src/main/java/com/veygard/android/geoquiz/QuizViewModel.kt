@@ -16,4 +16,5 @@ class QuizViewModel() : ViewModel() {
     var gameStarted = false
     var correctAnswer: String = ""
     var numOfButtonWithCorrectAnswer = -1
+    var hardModeStatus = false
 }

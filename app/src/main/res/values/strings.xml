@@ -4,7 +4,7 @@
     <string name="first_answer_text"> </string>
     <string name="second_answer_text"> </string>
     <string name="correct_toast">Вы ответили верно</string>
-    <string name="incorrect_toast">Вы ответили не верно</string>
+    <string name="incorrect_toast">Вы ответили не верно. Игра завершена!</string>
     <string name="already_answered_toast">Вы уже отвечали</string>
     <string name="next_button">Следующий</string>
     <string name="start_button">Начать игру</string>
@@ -22,9 +22,14 @@
     <string name="text_num_of_questions">Осталось %1$d вопросов из %2$d.</string>
     <string name="third_answer_text" />
     <string name="fourth_answer_text" />
+
     <string name="activity_main_title">Настройка игры:</string>
     <string name="text_set_num_question">Количество\nвопросов</string>
-    <string name="main_text_num_question">Выберите</string>
+    <string name="num_question_text_main">Выберите</string>
+    <string name="hard_mode_title_main">Сложный\nрежим</string>
+    <string name="hard_mode_title_dialog_main">Сложный режим</string>
+    <string name="hard_mode_dialog_message_main">Режим, при котором, в случае неправильного ответа - игра заканчивается!</string>
+
 
     <string-array name="NumQuestionsSpinner">
         <item>20</item>
