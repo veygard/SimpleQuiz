@@ -22,14 +22,13 @@
     <string name="text_num_of_questions">Осталось %1$d вопросов из %2$d.</string>
     <string name="third_answer_text" />
     <string name="fourth_answer_text" />
-
     <string name="activity_main_title">Настройка игры:</string>
     <string name="text_set_num_question">Количество\nвопросов</string>
     <string name="num_question_text_main">Выберите</string>
     <string name="hard_mode_title_main">Сложный\nрежим</string>
     <string name="hard_mode_title_dialog_main">Сложный режим</string>
     <string name="hard_mode_dialog_message_main">Режим, при котором, в случае неправильного ответа - игра заканчивается!</string>
-
+    <string name="timer_mode_title">Включить\nтаймер</string>
 
     <string-array name="NumQuestionsSpinner">
         <item>20</item>

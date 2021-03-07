@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private var hardModeStatus = false
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate called")
@@ -29,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         spinnerQuestionNum.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
-                itemSelected: View, selectedItemPosition: Int, selectedId: Long
+                itemSelected: View?, selectedItemPosition: Int, selectedId: Long
             ) {
                 val choose = resources.getStringArray(R.array.NumQuestionsSpinner)
                 numOfQuestionsAtStart = choose[selectedItemPosition].toInt()
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         //получаем индексы для выгрузки радномного списка вопросов
         val indexStart= (Math.random() * (questionList.size-countQ)).toInt()
         val indexEnd = indexStart +countQ
+        //формируем итоговый список вопросов для новой игры
         Question.questionListForGame = questionList.subList(indexStart, indexEnd)
     }
 
@@ -90,11 +92,10 @@ class MainActivity : AppCompatActivity() {
     fun hardModeQuestionmarkButtonClick(view: View) {
         val dialog = MyDialogFragments()
         val manager = supportFragmentManager
-        val title = getString(R.string.hard_mode_title_dialog_main)
         dialog.setTitleAndMessage(getString(R.string.hard_mode_title_dialog_main),getString(R.string.hard_mode_dialog_message_main))
         dialog.show(manager, "")
     }
-}
+   }
 
 
 

@@ -11,8 +11,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryVariant"
-        >
+        android:background="@color/colorPrimaryVariant">
 
         <Button
             android:id="@+id/start_over"
@@ -36,8 +35,8 @@
             android:background="@color/colorPrimaryVariant"
             android:gravity="center"
             android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@+id/start_over"
-            />
+            app:layout_constraintTop_toBottomOf="@+id/start_over"/>
+
         <TextView
             android:id="@+id/score_board_textview"
             android:layout_width="0dp"
@@ -81,7 +80,7 @@
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/question_text_view"
-            tools:text="1 ответ" />
+            tools:text="Answer" />
 
         <Button
             android:id="@+id/start_game_button"
@@ -95,7 +94,7 @@
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toEndOf="@+id/first_answer_button"
             app:layout_constraintTop_toTopOf="@+id/first_answer_button"
-            tools:text="2 ответ" />
+            tools:text="Answer" />
 
         <Button
             android:id="@+id/third_answer_button"
@@ -105,20 +104,19 @@
             app:layout_constraintEnd_toEndOf="@+id/first_answer_button"
             app:layout_constraintStart_toStartOf="@+id/first_answer_button"
             app:layout_constraintTop_toBottomOf="@+id/first_answer_button"
-            tools:text="3 ответ" />
+            tools:text="Answer\nasd" />
 
         <Button
             android:id="@+id/fourth_answer_button"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginStart="8dp"
             android:text="@string/fourth_answer_text"
             app:layout_constraintStart_toEndOf="@+id/third_answer_button"
             app:layout_constraintEnd_toEndOf="@id/start_game_button"
             app:layout_constraintTop_toTopOf="@+id/third_answer_button"
             app:layout_constraintBottom_toBottomOf="@id/third_answer_button"
-            tools:text="4 ответ" />
-
+            tools:text="Answer" />
 
         <ImageButton
             android:id="@+id/next_button"
@@ -133,8 +131,5 @@
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fourth_answer_button" />
-
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

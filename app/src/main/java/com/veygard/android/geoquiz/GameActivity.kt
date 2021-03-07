@@ -32,7 +32,6 @@ class GameActivity : AppCompatActivity() {
     private lateinit var questionNumTextView: TextView
     private lateinit var scoreTextView: TextView
     private lateinit var animClick: Animation //анимация кнопки нажатия
-    private var hardModeStatus = false
     private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) } //для сохранения параметров при приостановке апп
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +39,7 @@ class GameActivity : AppCompatActivity() {
         setContentView(R.layout.activity_game)
 
         //чекаем статус сложной игры
-        hardModeStatus = intent.extras?.getBoolean("hardModeStatus") ?: false
+        quizViewModel.hardModeStatus = intent.extras?.getBoolean("hardModeStatus") ?: false
 
         //добавляем кнопки
         questionTextView = findViewById(R.id.question_text_view)
@@ -191,19 +190,18 @@ class GameActivity : AppCompatActivity() {
             quizViewModel.score++
             //обновляем поле результата
             scoreTextView.text = getScoreText()
-        } else if (answer != correctAnswer) {
-            if (hardModeStatus) {
-                Handler(Looper.getMainLooper()).postDelayed({
-                    val toastMessage = Toast.makeText(
-                        applicationContext,
-                        R.string.incorrect_toast,
-                        Toast.LENGTH_LONG
-                    )
-                    toastMessage.setGravity(Gravity.TOP, 0, 200)
-                    toastMessage.show()
+        } else if (answer != correctAnswer && quizViewModel.hardModeStatus) {
+            val toastMessage = Toast.makeText(
+                applicationContext,
+                R.string.incorrect_toast,
+                Toast.LENGTH_LONG
+            )
+            toastMessage.setGravity(Gravity.TOP, 0, 200)
+            toastMessage.show()
+                      Handler(Looper.getMainLooper()).postDelayed({
                     gameOver()
                 }, 1000)
-            }
+
         }
         //меняем цвет кнопок
         changeButtonColorsAfterAnswer()
