@@ -10,13 +10,12 @@ import android.view.Gravity
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import java.lang.Thread.*
+import java.text.DecimalFormat
 
 
 private const val TAG = "GameActivity"
@@ -27,11 +26,16 @@ class GameActivity : AppCompatActivity() {
     private lateinit var answerButton2: Button
     private lateinit var answerButton3: Button
     private lateinit var answerButton4: Button
+    private lateinit var showAnswersButton: Button
     private lateinit var nextButton: ImageButton
     private lateinit var questionTextView: TextView
     private lateinit var questionNumTextView: TextView
     private lateinit var scoreTextView: TextView
     private lateinit var animClick: Animation //анимация кнопки нажатия
+    private lateinit var timerProgressBar: ProgressBar
+    private lateinit var timerTextView: TextView
+
+
     private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) } //для сохранения параметров при приостановке апп
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +44,17 @@ class GameActivity : AppCompatActivity() {
 
         //чекаем статус сложной игры
         quizViewModel.hardModeStatus = intent.extras?.getBoolean("hardModeStatus") ?: false
+
+        timerProgressBar = findViewById(R.id.timer_progressBar)
+        timerTextView = findViewById(R.id.timer_countdown_textView)
+        //чекаем статус таймера
+        quizViewModel.timerModeStatus = intent.extras?.getBoolean("timerModeStatus") ?: false
+        quizViewModel.timerModeSeconds = intent.extras?.getInt("timerModeSeconds") ?: 60
+        timerProgressBar.progress = quizViewModel.timerModeSeconds
+        timerProgressBar.max = quizViewModel.timerModeSeconds
+        showTimerProgressBar()
+        //запускаем таймер(если статус таймера ист)
+
 
         //добавляем кнопки
         questionTextView = findViewById(R.id.question_text_view)
@@ -67,6 +82,9 @@ class GameActivity : AppCompatActivity() {
             nextButton.startAnimation(animClick)
         }
 
+        showAnswersButton = findViewById(R.id.show_answers_button)
+
+
         updateQuestionAndAnswers() //показываем первый вопрос
 
         questionNumTextView = findViewById(R.id.questions_numbers)
@@ -75,6 +93,14 @@ class GameActivity : AppCompatActivity() {
         //выводим результат
         scoreTextView = findViewById(R.id.score_board_textview)
         scoreTextView.text = getScoreText()
+
+    }
+
+    private fun showTimerProgressBar() {
+        if (quizViewModel.timerModeStatus) {
+            timerProgressBar.visibility = View.VISIBLE
+            timerTextView.visibility = View.VISIBLE
+        }
     }
 
     //метод для слушателя, который проверяет ответ, включает анимацию нажатия, и рисует галочку на кнопке
@@ -85,43 +111,42 @@ class GameActivity : AppCompatActivity() {
                 0,
                 0,
                 0
-            );
+            )
         }
-        checkAnswer(quizViewModel.currentIndex, button.text.toString())
+        checkAnswer(button.text.toString())
         animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
         button.startAnimation(animClick)
     }
 
-    private fun updateQuestionAndAnswers() {
-        val index = quizViewModel.currentIndex
-        questionTextView.text = quizViewModel.questionBank[index].text
-        //Сохраняем текст правильного ответа
-        quizViewModel.correctAnswer = quizViewModel.questionBank[index].correctAnswer
-        //массив ответов на вопрос
-        val answersArray = arrayOf(
-            quizViewModel.questionBank[index].correctAnswer,
-            quizViewModel.questionBank[index].answer2,
-            quizViewModel.questionBank[index].answer3,
-            quizViewModel.questionBank[index].answer4
-        )
-        //тусуем индексы ответов в массиве и присваиваем кнопкам текст ответа
-        answersArray.shuffle()
-        answerButton1.text = answersArray[0]
-        answerButton2.text = answersArray[1]
-        answerButton3.text = answersArray[2]
-        answerButton4.text = answersArray[3]
+    private fun checkAnswer(answer: String) {
+        ThreadForTimerBar.interruptedForTimerBar = true
+        val correctAnswer = quizViewModel.correctAnswer
+        if (answer == correctAnswer && !quizViewModel.answerAlreadyDone) {
+            quizViewModel.score++
+            //обновляем поле результата
+            scoreTextView.text = getScoreText()
+            //если ответ ложный и игра в сложном режиме - переходим к результатам
+        } else if (answer != correctAnswer && quizViewModel.hardModeStatus) {
+            val toastMessage = Toast.makeText(
+                applicationContext,
+                R.string.incorrect_toast,
+                Toast.LENGTH_LONG
+            )
+            toastMessage.setGravity(Gravity.TOP, 0, 200)
+            toastMessage.show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                gameOver()
+            }, 1000)
 
-        //отмечаем индекс правильной кнопки(для дальнейшей проверки)
-        var count = 0
-        answersArray.forEach { str ->
-            if (str == quizViewModel.correctAnswer) {
-                quizViewModel.numOfButtonWithCorrectAnswer = count
-            }
-            count++
         }
+        //меняем цвет кнопок
+        changeButtonColorsAfterAnswer()
+        //отметка что уже отвечали на вопрос
+        quizViewModel.answerAlreadyDone = true
     }
 
     private fun nextQuestion() {
+        ThreadForTimerBar.interruptedForTimerBar = false
         //если пытаются нажать следующий вопрос до ответа.
         if (!quizViewModel.answerAlreadyDone) {
             val toastMessage = Toast.makeText(
@@ -152,8 +177,7 @@ class GameActivity : AppCompatActivity() {
         quizViewModel.currentIndex =
             questionsIndexNotShownList[(Math.random() * questionsIndexNotShownList.size).toInt()]
         updateQuestionAndAnswers()
-        //отмечаем что вопрос уже показывался
-        quizViewModel.questionBank[quizViewModel.currentIndex].questionShowed = true
+
 
         //откатываем проверку на повторное нажатие и меняём цвет кнопок на дефолтные
         quizViewModel.answerAlreadyDone = false
@@ -169,44 +193,66 @@ class GameActivity : AppCompatActivity() {
         removeDrawableFromButtons()
     }
 
+    //меняем текст у поля вопроса и кнопки ответов в соответствии с новым индексом
+    private fun updateQuestionAndAnswers() {
+        hideAnswersButtonsCheck()
+
+        val index = quizViewModel.currentIndex
+        questionTextView.text = quizViewModel.questionBank[index].text
+        //Сохраняем текст правильного ответа
+        quizViewModel.correctAnswer = quizViewModel.questionBank[index].correctAnswer
+        //массив ответов на вопрос
+        val answersArray = arrayOf(
+            quizViewModel.questionBank[index].correctAnswer,
+            quizViewModel.questionBank[index].answer2,
+            quizViewModel.questionBank[index].answer3,
+            quizViewModel.questionBank[index].answer4
+        )
+        //тусуем индексы ответов в массиве и присваиваем кнопкам текст ответа
+        answersArray.shuffle()
+        answerButton1.text = answersArray[0]
+        answerButton2.text = answersArray[1]
+        answerButton3.text = answersArray[2]
+        answerButton4.text = answersArray[3]
+
+        //отмечаем индекс правильной кнопки(для дальнейшей проверки)
+        var count = 0
+        answersArray.forEach { str ->
+            if (str == quizViewModel.correctAnswer) {
+                quizViewModel.numOfButtonWithCorrectAnswer = count
+            }
+            count++
+        }
+        //отмечаем что вопрос уже показывался
+        quizViewModel.questionBank[quizViewModel.currentIndex].questionShowed = true
+    }
+
     private fun removeDrawableFromButtons() {
-        answerButton1.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-        answerButton2.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-        answerButton3.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-        answerButton4.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        answerButton1.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+        answerButton2.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+        answerButton3.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+        answerButton4.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
     }
 
     private fun gameOver() {
+        ThreadForTimerBar.interruptedForTimerBar = true
         val intent = Intent(this, ScoreGameActivity::class.java)
         //передаём сумму правильных ответов
         intent.putExtra("scoreFinal", quizViewModel.score.toString())
         startActivity(intent)
     }
 
-
-    private fun checkAnswer(index: Int, answer: String) {
-        val correctAnswer = quizViewModel.correctAnswer
-        if (answer == correctAnswer && !quizViewModel.answerAlreadyDone) {
-            quizViewModel.score++
-            //обновляем поле результата
-            scoreTextView.text = getScoreText()
-        } else if (answer != correctAnswer && quizViewModel.hardModeStatus) {
-            val toastMessage = Toast.makeText(
-                applicationContext,
-                R.string.incorrect_toast,
-                Toast.LENGTH_LONG
-            )
-            toastMessage.setGravity(Gravity.TOP, 0, 200)
-            toastMessage.show()
-                      Handler(Looper.getMainLooper()).postDelayed({
-                    gameOver()
-                }, 1000)
-
+    private fun hideAnswersButtonsCheck() {
+        if (quizViewModel.timerModeStatus) {
+            timerTextView.text = quizViewModel.timerModeSeconds.toString()
+            timerProgressBar.max = quizViewModel.timerModeSeconds
+            timerProgressBar.progress = quizViewModel.timerModeSeconds
+            showAnswersButton.visibility = View.VISIBLE
+            answerButton1.visibility = View.INVISIBLE
+            answerButton2.visibility = View.INVISIBLE
+            answerButton3.visibility = View.INVISIBLE
+            answerButton4.visibility = View.INVISIBLE
         }
-        //меняем цвет кнопок
-        changeButtonColorsAfterAnswer()
-        //отметка что уже отвечали на вопрос
-        quizViewModel.answerAlreadyDone = true
     }
 
     //у правильного ответа ставим зеленый цвет, остальные серые
@@ -261,6 +307,23 @@ class GameActivity : AppCompatActivity() {
         startActivity(Intent(this, MainActivity::class.java))
     }
 
+    //метод старта прогресс бара отсчёта
+    private fun startTimerProgressBar() {
+        if (quizViewModel.timerModeStatus) {
+            ThreadForTimerBar.interruptedForTimerBar = false
+            val thread = Thread(
+                ThreadForTimerBar(
+                    timerProgressBar,
+                    timerTextView,
+                    quizViewModel.timerModeSeconds,
+                    this
+                )
+            )
+            thread.start()
+        }
+    }
+
+
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart called")
@@ -286,4 +349,58 @@ class GameActivity : AppCompatActivity() {
         super.onDestroy()
         Log.d(TAG, "onDestroy() called")
     }
+
+    //отдельный поток для прогресс бара таймера
+    class ThreadForTimerBar(
+        private val timerProgressBar: ProgressBar,
+        private val timerTextView: TextView,
+        private var seconds: Int,
+        private val gameActivity: GameActivity
+    ) : Runnable {
+
+        companion object {
+            var interruptedForTimerBar = false
+        }
+
+        private val handler = Handler()
+        val formatNum = DecimalFormat("0.#")
+        var doubleNum: Double = 0.0
+
+        override fun run() {
+            seconds *= 10
+            timerProgressBar.max = seconds
+//            Looper.prepare()
+            while (!interruptedForTimerBar && seconds >= 0) {
+                handler.post {
+                    doubleNum = (seconds).toDouble() / 10
+                    timerProgressBar.progress = seconds
+                    timerTextView.text = formatNum.format(doubleNum).toString()
+                    if (seconds == 0) {
+                        seconds--
+                        if (gameActivity.quizViewModel.hardModeStatus) {
+                            gameActivity.gameOver()
+                        }
+                        gameActivity.quizViewModel.answerAlreadyDone = true
+                        gameActivity.nextQuestion()
+                    }
+                }
+                seconds--
+                try {
+                    sleep(100)
+                } catch (e: InterruptedException) {
+                }
+            }
+//            Looper.loop()
+        }
+    }
+
+    fun showAnswersButtonClick(view: View) {
+        answerButton1.visibility = View.VISIBLE
+        answerButton2.visibility = View.VISIBLE
+        answerButton3.visibility = View.VISIBLE
+        answerButton4.visibility = View.VISIBLE
+        showAnswersButton.visibility = View.INVISIBLE
+        startTimerProgressBar()
+    }
 }
+

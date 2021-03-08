@@ -27,13 +27,23 @@
     <string name="num_question_text_main">Выберите</string>
     <string name="hard_mode_title_main">Сложный\nрежим</string>
     <string name="hard_mode_title_dialog_main">Сложный режим</string>
-    <string name="hard_mode_dialog_message_main">Режим, при котором, в случае неправильного ответа - игра заканчивается!</string>
+    <string name="timer_mode_title_dialog_main">Таймер</string>
+    <string name="hard_mode_dialog_message_main">Режим игры, при котором, в случае неправильного ответа - игра заканчивается!</string>
+    <string name="timer_mode_dialog_message_main">Режим игры, при котором устанавливается таймер, в течение которого надо ответить на вопрос. В случае окончания таймера, ответ считаеся неправильным, и игра переходит к следующему вопросу. А в сложном режиме - игра заканчивается.\n\nПри включении опции, можно выбрать кол-во секунд для таймера</string>
     <string name="timer_mode_title">Включить\nтаймер</string>
+    <string name="show_answer_text">Позать ответы</string>
 
     <string-array name="NumQuestionsSpinner">
         <item>20</item>
         <item>30</item>
         <item>40</item>
         <item>50</item>
+    </string-array>
+    <string-array name="TimerModeSpinnerArray">
+        <item>60</item>
+        <item>30</item>
+        <item>20</item>
+        <item>10</item>
+        <item>5</item>
     </string-array>
 </resources>

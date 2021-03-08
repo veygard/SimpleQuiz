@@ -3,7 +3,6 @@ package com.veygard.android.geoquiz
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
@@ -15,9 +14,13 @@ private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
     private  lateinit var spinnerQuestionNum : Spinner
-    private var numOfQuestionsAtStart = 10
+    private  lateinit var spinnerTimerMode : Spinner
+    private var numOfQuestionsAtStart = 20
+    private var timerModeSeconds = 60
     private lateinit var switchButtonHardMode: SwitchCompat
+    private lateinit var switchButtonTimerMode: SwitchCompat
     private var hardModeStatus = false
+    private var timerModeStatus = false
 
 
 
@@ -43,12 +46,38 @@ class MainActivity : AppCompatActivity() {
         switchButtonHardMode.setOnCheckedChangeListener { buttonView, isChecked ->
             hardModeStatus = isChecked
         }
+
+
+        spinnerTimerMode = findViewById(R.id.spinner_timer_mode)
+        spinnerTimerMode.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                itemSelected: View?, selectedItemPosition: Int, selectedId: Long
+            ) {
+                val choose = resources.getStringArray(R.array.TimerModeSpinnerArray)
+                timerModeSeconds = choose[selectedItemPosition].toInt()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+        switchButtonTimerMode = findViewById(R.id.timer_mode_switch)
+        switchButtonTimerMode.setOnCheckedChangeListener { _, isChecked ->
+            if(isChecked){
+                timerModeStatus = isChecked
+                spinnerTimerMode.visibility = View.VISIBLE
+            }
+            else{
+                timerModeStatus = false
+                spinnerTimerMode.visibility = View.INVISIBLE
+            }
+        }
     }
 
     fun startButtonClick(view: View) {
-        //стартуем активность игры, передаём статус сложной игры
+        //стартуем активность игры, передаём статус сложной игры/статус таймера
         val intent = Intent(this, GameActivity::class.java)
         intent.putExtra("hardModeStatus", hardModeStatus)
+        intent.putExtra("timerModeStatus", timerModeStatus)
+        intent.putExtra("timerModeSeconds", timerModeSeconds)
         startActivity(intent)
 
         //подготавливаем итоговый перечент вопросов
@@ -95,7 +124,14 @@ class MainActivity : AppCompatActivity() {
         dialog.setTitleAndMessage(getString(R.string.hard_mode_title_dialog_main),getString(R.string.hard_mode_dialog_message_main))
         dialog.show(manager, "")
     }
-   }
+
+    fun timerModeQuestionmarkButtonClick(view: View) {
+        val dialog = MyDialogFragments()
+        val manager = supportFragmentManager
+        dialog.setTitleAndMessage(getString(R.string.timer_mode_title),getString(R.string.timer_mode_dialog_message_main))
+        dialog.show(manager, "")
+    }
+}
 
 
 

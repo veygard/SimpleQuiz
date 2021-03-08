@@ -7,7 +7,8 @@ import androidx.lifecycle.ViewModel
 
 private const val TAG = "QuizViewModel"
 
-class QuizViewModel() : ViewModel() {
+class QuizViewModel : ViewModel() {
+
     var currentIndex = 0
     var score = 0
     var questionBank : List<Question> = Question.questionListForGame
@@ -17,4 +18,6 @@ class QuizViewModel() : ViewModel() {
     var correctAnswer: String = ""
     var numOfButtonWithCorrectAnswer = -1
     var hardModeStatus = false
+    var timerModeStatus = false
+    var timerModeSeconds: Int = 999
 }

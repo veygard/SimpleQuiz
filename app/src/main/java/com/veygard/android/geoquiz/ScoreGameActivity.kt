@@ -16,6 +16,9 @@ class ScoreGameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_score_game)
+
+        GameActivity.ThreadForTimerBar.interruptedForTimerBar = true //останавливаем поток таймера, почему-то нужно это повторно сделать здесь
+
         scoreBoardTextView = findViewById(R.id.score_board_textview)
         scoreBoardTextView.text = getString(R.string.text_result_score,
             intent.extras?.getString("scoreFinal")?.toInt(), quizViewModel.questionBank.size

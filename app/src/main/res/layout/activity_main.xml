@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/backgroundPrimary"
+    android:fillViewport="true"
+    >
+
+<androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="#FFE082"
     android:fitsSystemWindows="true"
     tools:context=".MainActivity"
@@ -91,10 +98,66 @@
         app:layout_constraintStart_toEndOf="@+id/hardmode_textView"
         app:layout_constraintTop_toTopOf="@+id/hardmode_textView"
         app:srcCompat="@drawable/ic_baseline_question_mark"
-        android:onClick="hardModeQuestionmarkButtonClick"/>
+        android:onClick="hardModeQuestionmarkButtonClick"
+        android:contentDescription="info hard mode"
+        tools:ignore="HardcodedText" />
 
+    <TextView
+        android:id="@+id/timer_mode_textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/timer_mode_title"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/hardmode_textView"
+        app:layout_constraintStart_toStartOf="@+id/hardmode_textView"
+        app:layout_constraintTop_toBottomOf="@+id/hardmode_textView" />
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/timer_mode_switch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:thumb="@drawable/thumb_selector"
+        app:track="@drawable/track_selector"
+        android:checked = "false"
+        app:layout_constraintBottom_toBottomOf="@+id/timer_mode_textView"
+        app:layout_constraintEnd_toEndOf="@+id/spinner_num_questions"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/timer_mode_questionmark_button"
+        app:layout_constraintTop_toTopOf="@+id/timer_mode_textView"
+        app:layout_constraintVertical_bias="1.0"/>
 
+    <ImageButton
+        android:id="@+id/timer_mode_questionmark_button"
+        android:layout_width="21dp"
+        android:layout_height="21dp"
+        app:layout_constraintBottom_toBottomOf="@+id/timer_mode_textView"
+        app:layout_constraintStart_toEndOf="@+id/timer_mode_textView"
+        app:layout_constraintTop_toTopOf="@+id/timer_mode_textView"
+        app:srcCompat="@drawable/ic_baseline_question_mark"
+        android:onClick="timerModeQuestionmarkButtonClick"
+        android:contentDescription="info timer mode"
+        tools:ignore="HardcodedText" />
+
+    <Spinner
+        android:id="@+id/spinner_timer_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:entries="@array/TimerModeSpinnerArray"
+        android:gravity="start"
+        tools:visibility="visible"
+        android:spinnerMode="dropdown"
+        android:textAlignment="textStart"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="@id/timer_mode_textView"
+        app:layout_constraintStart_toStartOf="@id/timer_mode_questionmark_button"
+        app:layout_constraintEnd_toEndOf="@id/timer_mode_switch"
+        app:layout_constraintBottom_toBottomOf="@id/timer_mode_textView"
+ />
 
     <Button
         android:id="@+id/start_game_button"
@@ -106,5 +169,8 @@
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hardmode_textView" />
+        app:layout_constraintTop_toBottomOf="@+id/timer_mode_textView" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

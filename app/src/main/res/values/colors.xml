@@ -8,10 +8,11 @@
     <color name="black">#292424</color>
     <color name="white">#FFFFFFFF</color>
     <color name="colorPrimary">#0098CA</color>
-    <color name="colorPrimaryVariant">#FFE082</color>
+    <color name="backgroundPrimary">#FFE082</color>
     <color name="correct_answer">#4CAF50</color>
     <color name="incorrect_answer">#919193</color>
     <color name="question_num_background">#FFF59D</color>
+    <color name="question_view_background_color">#C5E1A5</color>
 
 
 </resources>
