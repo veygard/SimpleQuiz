@@ -14,6 +14,8 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.veygard.android.geoquiz.GameActivity.ThreadForTimerBar.Companion.interruptedForTimerBar
 import java.lang.Thread.*
 import java.text.DecimalFormat
 
@@ -27,6 +29,8 @@ class GameActivity : AppCompatActivity() {
     private lateinit var answerButton3: Button
     private lateinit var answerButton4: Button
     private lateinit var showAnswersButton: Button
+    private lateinit var startOver: Button
+    private lateinit var floatingButtonForStartOver: FloatingActionButton
     private lateinit var nextButton: ImageButton
     private lateinit var questionTextView: TextView
     private lateinit var questionNumTextView: TextView
@@ -91,9 +95,21 @@ class GameActivity : AppCompatActivity() {
         //выводим сколько вопросов осталось
         questionNumTextView.text = getQuestionNumText()
         //выводим результат
-        scoreTextView = findViewById(R.id.score_board_textview)
+        scoreTextView = findViewById(R.id.score_board_textView)
         scoreTextView.text = getScoreText()
 
+        startOver = findViewById(R.id.start_over)
+        var startOverButtonVisible = false
+        floatingButtonForStartOver = findViewById(R.id.floating_button_start_over)
+        floatingButtonForStartOver.setOnClickListener {
+            if (!startOverButtonVisible) {
+                startOver.visibility = View.VISIBLE
+                startOverButtonVisible = true
+            } else {
+                startOver.visibility = View.INVISIBLE
+                startOverButtonVisible = false
+            }
+        }
     }
 
     private fun showTimerProgressBar() {
@@ -119,7 +135,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(answer: String) {
-        ThreadForTimerBar.interruptedForTimerBar = true
+        interruptedForTimerBar = true
         val correctAnswer = quizViewModel.correctAnswer
         if (answer == correctAnswer && !quizViewModel.answerAlreadyDone) {
             quizViewModel.score++
@@ -146,7 +162,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun nextQuestion() {
-        ThreadForTimerBar.interruptedForTimerBar = false
+        interruptedForTimerBar = false
         //если пытаются нажать следующий вопрос до ответа.
         if (!quizViewModel.answerAlreadyDone) {
             val toastMessage = Toast.makeText(
@@ -235,7 +251,6 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun gameOver() {
-        ThreadForTimerBar.interruptedForTimerBar = true
         val intent = Intent(this, ScoreGameActivity::class.java)
         //передаём сумму правильных ответов
         intent.putExtra("scoreFinal", quizViewModel.score.toString())
@@ -310,7 +325,7 @@ class GameActivity : AppCompatActivity() {
     //метод старта прогресс бара отсчёта
     private fun startTimerProgressBar() {
         if (quizViewModel.timerModeStatus) {
-            ThreadForTimerBar.interruptedForTimerBar = false
+            interruptedForTimerBar = false
             val thread = Thread(
                 ThreadForTimerBar(
                     timerProgressBar,
@@ -323,6 +338,14 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
+    fun showAnswersButtonClick(view: View) {
+        answerButton1.visibility = View.VISIBLE
+        answerButton2.visibility = View.VISIBLE
+        answerButton3.visibility = View.VISIBLE
+        answerButton4.visibility = View.VISIBLE
+        showAnswersButton.visibility = View.INVISIBLE
+        startTimerProgressBar()
+    }
 
     override fun onStart() {
         super.onStart()
@@ -351,6 +374,8 @@ class GameActivity : AppCompatActivity() {
     }
 
     //отдельный поток для прогресс бара таймера
+    //в конструкторе инстансы прогресс бара, текст-вью для отображения значений, значение для отсчета,
+    // инстанс активности в которой будем создавать поток
     class ThreadForTimerBar(
         private val timerProgressBar: ProgressBar,
         private val timerTextView: TextView,
@@ -359,24 +384,28 @@ class GameActivity : AppCompatActivity() {
     ) : Runnable {
 
         companion object {
+            //нужен для остановки цикла и завершения потока
             var interruptedForTimerBar = false
         }
 
-        private val handler = Handler()
+        private val handler = Handler() //для задержки
         val formatNum = DecimalFormat("0.#")
         var doubleNum: Double = 0.0
-
         override fun run() {
+            //т.к. нам нужно чтобы поток срабатывал быстро, иначе не успеем вовремя его остановить
+            //секунды умнажаем на 10, а время ожинаия уменьшаем до 100мс
             seconds *= 10
+
             timerProgressBar.max = seconds
 //            Looper.prepare()
             while (!interruptedForTimerBar && seconds >= 0) {
                 handler.post {
-                    doubleNum = (seconds).toDouble() / 10
+                    doubleNum = (seconds).toDouble() / 10 //для отображения в десятичном виде
                     timerProgressBar.progress = seconds
                     timerTextView.text = formatNum.format(doubleNum).toString()
-                    if (seconds == 0) {
-                        seconds--
+                    if (seconds == 0) { //если таймер закночился - завершаем
+                        interruptedForTimerBar = true
+                        seconds-- //для того чтобы сработала еще 1 проверка проверка
                         if (gameActivity.quizViewModel.hardModeStatus) {
                             gameActivity.gameOver()
                         }
@@ -394,13 +423,6 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun showAnswersButtonClick(view: View) {
-        answerButton1.visibility = View.VISIBLE
-        answerButton2.visibility = View.VISIBLE
-        answerButton3.visibility = View.VISIBLE
-        answerButton4.visibility = View.VISIBLE
-        showAnswersButton.visibility = View.INVISIBLE
-        startTimerProgressBar()
-    }
+
 }
 

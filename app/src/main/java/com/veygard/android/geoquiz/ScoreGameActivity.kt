@@ -19,7 +19,7 @@ class ScoreGameActivity : AppCompatActivity() {
 
         GameActivity.ThreadForTimerBar.interruptedForTimerBar = true //останавливаем поток таймера, почему-то нужно это повторно сделать здесь
 
-        scoreBoardTextView = findViewById(R.id.score_board_textview)
+        scoreBoardTextView = findViewById(R.id.score_board_textView)
         scoreBoardTextView.text = getString(R.string.text_result_score,
             intent.extras?.getString("scoreFinal")?.toInt(), quizViewModel.questionBank.size
         )
