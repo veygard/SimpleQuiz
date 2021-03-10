@@ -2,6 +2,7 @@ package com.veygard.android.geoquiz
 
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,13 +16,25 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.veygard.android.geoquiz.GameActivity.ThreadForTimerBar.Companion.interruptedForTimerBar
-import java.lang.Thread.*
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.veygard.android.geoquiz.ThreadForTimerBar.Companion.interruptedForTimerBar
+import java.lang.reflect.Type
 import java.text.DecimalFormat
 
 
 private const val TAG = "GameActivity"
-
+private const val CURRENT_INDEX = "currentIndex"
+private const val SCORE = "score"
+private const val ANSWER_ALREADY_DONE = "answerAlreadyDone"
+private const val NUM_OF_QUESTIONS_FOR_TEXT_VIEW = "numOfQuestionsForTextView"
+private const val GAME_STARTED = "gameStarted"
+private const val CORRECT_ANSWER = "correctAnswer"
+private const val NUM_OF_BUTTON_CORRECT_ANSWER = "numOfButtonWithCorrectAnswer"
+private const val HARD_MODE_STATUS = "hardModeStatus"
+private const val TIMER_MODE_STATUS = "timerModeStatus"
+private const val TIMER_MODE_SECONDS = "timerModeSeconds"
+private const val QUESTION_BANK = "questionBank "
 
 class GameActivity : AppCompatActivity() {
     private lateinit var answerButton1: Button
@@ -38,30 +51,50 @@ class GameActivity : AppCompatActivity() {
     private lateinit var animClick: Animation //анимация кнопки нажатия
     private lateinit var timerProgressBar: ProgressBar
     private lateinit var timerTextView: TextView
+    private var numOfQuestionsAtStart = 0
+    private var restartCheck = false
 
 
-    private val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) } //для сохранения параметров при приостановке апп
+    val quizViewModel: QuizViewModel by lazy { ViewModelProvider(this).get(QuizViewModel::class.java) } //для сохранения параметров при приостановке апп
+
+    companion object {
+        const val TIMER_MILLISECONDS_LEFT = "timerMillisecondsLeft"
+        const val TIMER_MILLISECONDS_MAX = "timerMillisecondsMax"
+        lateinit var saveGameActStatusFile: SharedPreferences
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        //чекаем статус сложной игры
-        quizViewModel.hardModeStatus = intent.extras?.getBoolean("hardModeStatus") ?: false
+        //инициализируем файл сохранения статуса
+        saveGameActStatusFile = getSharedPreferences("Game_activity_savings", MODE_PRIVATE)
+        //проверяем это новая игра или прерванный статус
 
+        questionTextView = findViewById(R.id.question_text_view)
         timerProgressBar = findViewById(R.id.timer_progressBar)
         timerTextView = findViewById(R.id.timer_countdown_textView)
-        //чекаем статус таймера
-        quizViewModel.timerModeStatus = intent.extras?.getBoolean("timerModeStatus") ?: false
-        quizViewModel.timerModeSeconds = intent.extras?.getInt("timerModeSeconds") ?: 60
-        timerProgressBar.progress = quizViewModel.timerModeSeconds
-        timerProgressBar.max = quizViewModel.timerModeSeconds
-        showTimerProgressBar()
-        //запускаем таймер(если статус таймера ист)
+
+        restartCheck = intent.extras?.getBoolean("restartCheck") ?: true
+        //получаем аргументы из прошлой активности, или из файла по статусу рестарта
+        getGameArguments(restartCheck)
 
 
-        //добавляем кнопки
-        questionTextView = findViewById(R.id.question_text_view)
+        buttonsAndListeners() //кнопки и слушатели
+
+        updateQuestionAndAnswers() //показываем первый вопрос
+
+        questionNumTextView = findViewById(R.id.questions_numbers)
+        //выводим сколько вопросов осталось
+        questionNumTextView.text = getQuestionNumText()
+        //выводим результат
+        scoreTextView = findViewById(R.id.score_board_textView)
+        scoreTextView.text = getScoreText()
+
+    }
+
+    private fun buttonsAndListeners(){
         answerButton1 = findViewById(R.id.first_answer_button)
         answerButton1.setOnClickListener {
             answerButtonListenerAction(answerButton1)
@@ -85,19 +118,7 @@ class GameActivity : AppCompatActivity() {
             animClick = AnimationUtils.loadAnimation(this, R.anim.click_animation)
             nextButton.startAnimation(animClick)
         }
-
         showAnswersButton = findViewById(R.id.show_answers_button)
-
-
-        updateQuestionAndAnswers() //показываем первый вопрос
-
-        questionNumTextView = findViewById(R.id.questions_numbers)
-        //выводим сколько вопросов осталось
-        questionNumTextView.text = getQuestionNumText()
-        //выводим результат
-        scoreTextView = findViewById(R.id.score_board_textView)
-        scoreTextView.text = getScoreText()
-
         startOver = findViewById(R.id.start_over)
         var startOverButtonVisible = false
         floatingButtonForStartOver = findViewById(R.id.floating_button_start_over)
@@ -111,6 +132,22 @@ class GameActivity : AppCompatActivity() {
             }
         }
     }
+    private fun getGameArguments(restartCheck: Boolean){
+        if (!restartCheck) {
+            //получаем из майн кол-во вопросов для отображения
+            numOfQuestionsAtStart = intent.extras?.getInt("numOfQuestionsAtStart") ?: 20
+            //формируем список вопросов
+            formQuestionList(numOfQuestionsAtStart)
+            //чекаем статус сложной игры
+            quizViewModel.hardModeStatus = intent.extras?.getBoolean("hardModeStatus") ?: false
+            //чекаем статус таймера
+            quizViewModel.timerModeStatus = intent.extras?.getBoolean("timerModeStatus") ?: false
+            quizViewModel.timerModeMilliSeconds = intent.extras?.getInt("timerModeMilliSeconds") ?: 60
+        } else {
+            getGameSettingsFromFile()
+            loadQuestionList()
+        }
+    }
 
     private fun showTimerProgressBar() {
         if (quizViewModel.timerModeStatus) {
@@ -118,6 +155,28 @@ class GameActivity : AppCompatActivity() {
             timerTextView.visibility = View.VISIBLE
         }
     }
+    private  fun settingTimerBarArguments(restartCheck:Boolean){
+        if (!restartCheck){
+            timerProgressBar.max = quizViewModel.timerModeMilliSeconds
+            timerProgressBar.progress = quizViewModel.timerModeMilliSeconds
+            val doubleNum = (quizViewModel.timerModeMilliSeconds).toDouble() / 10
+            val formatNum = DecimalFormat("0.#")
+            timerTextView.text = formatNum.format(doubleNum).toString()
+            showTimerProgressBar()
+        }
+        else {
+            //восстанавливаем положение таймера
+            val millisecondsMax = saveGameActStatusFile.getInt(TIMER_MILLISECONDS_MAX, 60)
+            timerProgressBar.max = millisecondsMax
+            val millisecondsLeft = saveGameActStatusFile.getInt(TIMER_MILLISECONDS_LEFT, 60)
+            timerProgressBar.progress = millisecondsLeft
+            val doubleNum = (millisecondsLeft).toDouble() / 10
+            val formatNum = DecimalFormat("0.#")
+            timerTextView.text = formatNum.format(doubleNum).toString()
+            showTimerProgressBar()
+        }
+    }
+
 
     //метод для слушателя, который проверяет ответ, включает анимацию нажатия, и рисует галочку на кнопке
     private fun answerButtonListenerAction(button: Button) {
@@ -153,7 +212,6 @@ class GameActivity : AppCompatActivity() {
             Handler(Looper.getMainLooper()).postDelayed({
                 gameOver()
             }, 1000)
-
         }
         //меняем цвет кнопок
         changeButtonColorsAfterAnswer()
@@ -161,8 +219,9 @@ class GameActivity : AppCompatActivity() {
         quizViewModel.answerAlreadyDone = true
     }
 
-    private fun nextQuestion() {
+    fun nextQuestion() {
         interruptedForTimerBar = false
+        restartCheck = false
         //если пытаются нажать следующий вопрос до ответа.
         if (!quizViewModel.answerAlreadyDone) {
             val toastMessage = Toast.makeText(
@@ -190,10 +249,13 @@ class GameActivity : AppCompatActivity() {
         questionNumTextView.text = getQuestionNumText()
         scoreTextView.text = getScoreText()
         //получаем случайный индекс следующего вопроса
-        quizViewModel.currentIndex =
-            questionsIndexNotShownList[(Math.random() * questionsIndexNotShownList.size).toInt()]
-        updateQuestionAndAnswers()
-
+        if (!restartCheck) {
+            quizViewModel.currentIndex =
+                questionsIndexNotShownList[(Math.random() * questionsIndexNotShownList.size).toInt()]
+            updateQuestionAndAnswers()
+        } else {
+            quizViewModel.currentIndex = saveGameActStatusFile.getInt(CURRENT_INDEX, 0)
+        }
 
         //откатываем проверку на повторное нажатие и меняём цвет кнопок на дефолтные
         quizViewModel.answerAlreadyDone = false
@@ -211,6 +273,7 @@ class GameActivity : AppCompatActivity() {
 
     //меняем текст у поля вопроса и кнопки ответов в соответствии с новым индексом
     private fun updateQuestionAndAnswers() {
+
         hideAnswersButtonsCheck()
 
         val index = quizViewModel.currentIndex
@@ -250,18 +313,18 @@ class GameActivity : AppCompatActivity() {
         answerButton4.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
     }
 
-    private fun gameOver() {
+    fun gameOver() {
         val intent = Intent(this, ScoreGameActivity::class.java)
         //передаём сумму правильных ответов
         intent.putExtra("scoreFinal", quizViewModel.score.toString())
+        intent.putExtra("numOfQuestions", quizViewModel.questionBank.size.toString())
+        intent.putExtra("restartCheck", false)
         startActivity(intent)
     }
 
     private fun hideAnswersButtonsCheck() {
         if (quizViewModel.timerModeStatus) {
-            timerTextView.text = quizViewModel.timerModeSeconds.toString()
-            timerProgressBar.max = quizViewModel.timerModeSeconds
-            timerProgressBar.progress = quizViewModel.timerModeSeconds
+            settingTimerBarArguments(restartCheck)
             showAnswersButton.visibility = View.VISIBLE
             answerButton1.visibility = View.INVISIBLE
             answerButton2.visibility = View.INVISIBLE
@@ -319,18 +382,21 @@ class GameActivity : AppCompatActivity() {
     fun startOver() {
         quizViewModel.score = 0
         quizViewModel.gameStarted = false
+        val editor = MainActivity.saveMainActSettingsFile.edit()
+        editor.putString(MainActivity.ACTIVITY_NAME, "main_activity").apply()
         startActivity(Intent(this, MainActivity::class.java))
     }
 
     //метод старта прогресс бара отсчёта
-    private fun startTimerProgressBar() {
+    private fun startTimerProgressBar(secondsLeft:Int, secondsMax:Int) {
         if (quizViewModel.timerModeStatus) {
             interruptedForTimerBar = false
             val thread = Thread(
                 ThreadForTimerBar(
                     timerProgressBar,
                     timerTextView,
-                    quizViewModel.timerModeSeconds,
+                    secondsLeft,
+                    secondsMax,
                     this
                 )
             )
@@ -344,7 +410,9 @@ class GameActivity : AppCompatActivity() {
         answerButton3.visibility = View.VISIBLE
         answerButton4.visibility = View.VISIBLE
         showAnswersButton.visibility = View.INVISIBLE
-        startTimerProgressBar()
+        val secondsLeftNow = timerProgressBar.progress
+        val secondsMaxNow = timerProgressBar.max
+        startTimerProgressBar(secondsLeftNow, secondsMaxNow)
     }
 
     override fun onStart() {
@@ -365,64 +433,76 @@ class GameActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onStop() called")
-
+        val editor = MainActivity.saveMainActSettingsFile.edit()
+        editor.putString(MainActivity.ACTIVITY_NAME, "game_activity").apply()
+        setGameSettingsToFile()
+        saveQuestionList()
     }
+
+    private fun setGameSettingsToFile() {
+        val gameEditor = saveGameActStatusFile.edit()
+        gameEditor.putInt(CURRENT_INDEX, quizViewModel.currentIndex).apply()
+        gameEditor.putInt(SCORE, quizViewModel.score).apply()
+        gameEditor.putInt(NUM_OF_QUESTIONS_FOR_TEXT_VIEW, quizViewModel.numOfQuestionsForTextView)
+            .apply()
+        gameEditor.putInt(NUM_OF_BUTTON_CORRECT_ANSWER, quizViewModel.numOfButtonWithCorrectAnswer)
+            .apply()
+        gameEditor.putInt(TIMER_MODE_SECONDS, quizViewModel.timerModeMilliSeconds).apply()
+        gameEditor.putBoolean(ANSWER_ALREADY_DONE, quizViewModel.answerAlreadyDone).apply()
+        gameEditor.putBoolean(GAME_STARTED, quizViewModel.gameStarted).apply()
+        gameEditor.putBoolean(HARD_MODE_STATUS, quizViewModel.hardModeStatus).apply()
+        gameEditor.putBoolean(TIMER_MODE_STATUS, quizViewModel.timerModeStatus).apply()
+        gameEditor.putString(CORRECT_ANSWER, quizViewModel.correctAnswer).apply()
+    }
+
+    private fun getGameSettingsFromFile() {
+        quizViewModel.currentIndex = saveGameActStatusFile.getInt(CURRENT_INDEX, 0)
+        quizViewModel.score = saveGameActStatusFile.getInt(SCORE, 0)
+        quizViewModel.numOfQuestionsForTextView = saveGameActStatusFile.getInt(
+            NUM_OF_QUESTIONS_FOR_TEXT_VIEW, 0
+        )
+        quizViewModel.numOfButtonWithCorrectAnswer = saveGameActStatusFile.getInt(
+            NUM_OF_BUTTON_CORRECT_ANSWER, 0
+        )
+        quizViewModel.answerAlreadyDone =
+            saveGameActStatusFile.getBoolean(ANSWER_ALREADY_DONE, false)
+        quizViewModel.gameStarted = saveGameActStatusFile.getBoolean(GAME_STARTED, false)
+        quizViewModel.correctAnswer = saveGameActStatusFile.getString(CORRECT_ANSWER, "").toString()
+        quizViewModel.hardModeStatus = saveGameActStatusFile.getBoolean(HARD_MODE_STATUS, false)
+        quizViewModel.timerModeStatus = saveGameActStatusFile.getBoolean(TIMER_MODE_STATUS, false)
+        quizViewModel.timerModeMilliSeconds = saveGameActStatusFile.getInt(TIMER_MODE_SECONDS, 60)
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy() called")
     }
 
-    //отдельный поток для прогресс бара таймера
-    //в конструкторе инстансы прогресс бара, текст-вью для отображения значений, значение для отсчета,
-    // инстанс активности в которой будем создавать поток
-    class ThreadForTimerBar(
-        private val timerProgressBar: ProgressBar,
-        private val timerTextView: TextView,
-        private var seconds: Int,
-        private val gameActivity: GameActivity
-    ) : Runnable {
+    private fun saveQuestionList() {
+        val editor = saveGameActStatusFile.edit()
+        val gson = Gson()
+        val json = gson.toJson(quizViewModel.questionBank)
+        editor.putString(QUESTION_BANK, json).apply()
+    }
 
-        companion object {
-            //нужен для остановки цикла и завершения потока
-            var interruptedForTimerBar = false
-        }
-
-        private val handler = Handler() //для задержки
-        val formatNum = DecimalFormat("0.#")
-        var doubleNum: Double = 0.0
-        override fun run() {
-            //т.к. нам нужно чтобы поток срабатывал быстро, иначе не успеем вовремя его остановить
-            //секунды умнажаем на 10, а время ожинаия уменьшаем до 100мс
-            seconds *= 10
-
-            timerProgressBar.max = seconds
-//            Looper.prepare()
-            while (!interruptedForTimerBar && seconds >= 0) {
-                handler.post {
-                    doubleNum = (seconds).toDouble() / 10 //для отображения в десятичном виде
-                    timerProgressBar.progress = seconds
-                    timerTextView.text = formatNum.format(doubleNum).toString()
-                    if (seconds == 0) { //если таймер закночился - завершаем
-                        interruptedForTimerBar = true
-                        seconds-- //для того чтобы сработала еще 1 проверка проверка
-                        if (gameActivity.quizViewModel.hardModeStatus) {
-                            gameActivity.gameOver()
-                        }
-                        gameActivity.quizViewModel.answerAlreadyDone = true
-                        gameActivity.nextQuestion()
-                    }
-                }
-                seconds--
-                try {
-                    sleep(100)
-                } catch (e: InterruptedException) {
-                }
-            }
-//            Looper.loop()
+    private fun loadQuestionList() {
+        val gson = Gson()
+        val json = saveGameActStatusFile.getString(QUESTION_BANK, null)
+        val type: Type = object : TypeToken<ArrayList<Question>>() {}.type
+        quizViewModel.questionBank = gson.fromJson(json, type)
+        if (quizViewModel.questionBank.isEmpty()) {
+            quizViewModel.questionBank = listOf()
         }
     }
 
-
+    private fun formQuestionList(countQ: Int) {
+        val questionList = QuestionStorage.getQuestionListAtStart()
+        //получаем индексы для выгрузки радномного списка вопросов
+        val indexStart = (Math.random() * (questionList.size - countQ)).toInt()
+        val indexEnd = indexStart + countQ
+        //формируем итоговый список вопросов для новой игры
+        QuestionStorage.questionListForGame = questionList.subList(indexStart, indexEnd)
+    }
 }
 

@@ -98,7 +98,7 @@
         app:layout_constraintStart_toEndOf="@+id/hardmode_textView"
         app:layout_constraintTop_toTopOf="@+id/hardmode_textView"
         app:srcCompat="@drawable/ic_baseline_question_mark"
-        android:onClick="hardModeQuestionmarkButtonClick"
+        android:onClick="hardModeQuestionMarkButtonClick"
         android:contentDescription="info hard mode"
         tools:ignore="HardcodedText" />
 
@@ -138,7 +138,7 @@
         app:layout_constraintStart_toEndOf="@+id/timer_mode_textView"
         app:layout_constraintTop_toTopOf="@+id/timer_mode_textView"
         app:srcCompat="@drawable/ic_baseline_question_mark"
-        android:onClick="timerModeQuestionmarkButtonClick"
+        android:onClick="timerModeQuestionMarkButtonClick"
         android:contentDescription="info timer mode"
         tools:ignore="HardcodedText" />
 
@@ -149,6 +149,7 @@
         android:backgroundTint="@color/colorPrimary"
         android:entries="@array/TimerModeSpinnerArray"
         android:gravity="start"
+
         tools:visibility="visible"
         android:spinnerMode="dropdown"
         android:textAlignment="textStart"
